@@ -361,6 +361,30 @@ export async function handleCoreHttpRequest(
     });
   }
 
+  if (url.pathname === "/core/browser") {
+    return executeTool({
+      toolName: "browser",
+      args,
+      action: typeof body.action === "string" ? body.action : undefined,
+      req,
+      res,
+      auth: opts.auth,
+      rateLimiter: opts.rateLimiter,
+    });
+  }
+
+  if (url.pathname === "/core/canvas") {
+    return executeTool({
+      toolName: "canvas",
+      args,
+      action: typeof body.action === "string" ? body.action : undefined,
+      req,
+      res,
+      auth: opts.auth,
+      rateLimiter: opts.rateLimiter,
+    });
+  }
+
   if (url.pathname === "/core/channels/status") {
     const payload = await buildChannelsStatus();
     sendJson(res, 200, { ok: true, result: payload });
