@@ -385,6 +385,18 @@ export async function handleCoreHttpRequest(
     });
   }
 
+  if (url.pathname === "/core/cron") {
+    return executeTool({
+      toolName: "cron",
+      args,
+      action: typeof body.action === "string" ? body.action : undefined,
+      req,
+      res,
+      auth: opts.auth,
+      rateLimiter: opts.rateLimiter,
+    });
+  }
+
   if (url.pathname === "/core/channels/status") {
     const payload = await buildChannelsStatus();
     sendJson(res, 200, { ok: true, result: payload });
