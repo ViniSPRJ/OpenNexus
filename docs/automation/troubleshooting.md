@@ -14,28 +14,28 @@ Use this page for scheduler and delivery issues (`cron` + `heartbeat`).
 ## Command ladder
 
 ```bash
-openclaw status
-openclaw gateway status
-openclaw logs --follow
-openclaw doctor
-openclaw channels status --probe
+opennexus status
+opennexus gateway status
+opennexus logs --follow
+opennexus doctor
+opennexus channels status --probe
 ```
 
 Then run automation checks:
 
 ```bash
-openclaw cron status
-openclaw cron list
-openclaw system heartbeat last
+opennexus cron status
+opennexus cron list
+opennexus system heartbeat last
 ```
 
 ## Cron not firing
 
 ```bash
-openclaw cron status
-openclaw cron list
-openclaw cron runs --id <jobId> --limit 20
-openclaw logs --follow
+opennexus cron status
+opennexus cron list
+opennexus cron runs --id <jobId> --limit 20
+opennexus logs --follow
 ```
 
 Good output looks like:
@@ -53,10 +53,10 @@ Common signatures:
 ## Cron fired but no delivery
 
 ```bash
-openclaw cron runs --id <jobId> --limit 20
-openclaw cron list
-openclaw channels status --probe
-openclaw logs --follow
+opennexus cron runs --id <jobId> --limit 20
+opennexus cron list
+opennexus channels status --probe
+opennexus logs --follow
 ```
 
 Good output looks like:
@@ -74,10 +74,10 @@ Common signatures:
 ## Heartbeat suppressed or skipped
 
 ```bash
-openclaw system heartbeat last
-openclaw logs --follow
-openclaw config get agents.defaults.heartbeat
-openclaw channels status --probe
+opennexus system heartbeat last
+opennexus logs --follow
+opennexus config get agents.defaults.heartbeat
+opennexus channels status --probe
 ```
 
 Good output looks like:
@@ -95,11 +95,11 @@ Common signatures:
 ## Timezone and activeHours gotchas
 
 ```bash
-openclaw config get agents.defaults.heartbeat.activeHours
-openclaw config get agents.defaults.heartbeat.activeHours.timezone
-openclaw config get agents.defaults.userTimezone || echo "agents.defaults.userTimezone not set"
-openclaw cron list
-openclaw logs --follow
+opennexus config get agents.defaults.heartbeat.activeHours
+opennexus config get agents.defaults.heartbeat.activeHours.timezone
+opennexus config get agents.defaults.userTimezone || echo "agents.defaults.userTimezone not set"
+opennexus cron list
+opennexus logs --follow
 ```
 
 Quick rules:

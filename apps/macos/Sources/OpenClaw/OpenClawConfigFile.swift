@@ -1,20 +1,20 @@
 import Foundation
-import OpenClawProtocol
+import OpenNexusProtocol
 
-enum OpenClawConfigFile {
-    private static let logger = Logger(subsystem: "ai.openclaw", category: "config")
+enum OpenNexusConfigFile {
+    private static let logger = Logger(subsystem: "ai.opennexus", category: "config")
     private static let configAuditFileName = "config-audit.jsonl"
 
     static func url() -> URL {
-        OpenClawPaths.configURL
+        OpenNexusPaths.configURL
     }
 
     static func stateDirURL() -> URL {
-        OpenClawPaths.stateDirURL
+        OpenNexusPaths.stateDirURL
     }
 
     static func defaultWorkspaceURL() -> URL {
-        OpenClawPaths.workspaceURL
+        OpenNexusPaths.workspaceURL
     }
 
     static func loadDict() -> [String: Any] {
@@ -338,7 +338,7 @@ enum OpenClawConfigFile {
     private static func appendConfigWriteAudit(_ fields: [String: Any]) {
         var record: [String: Any] = [
             "ts": ISO8601DateFormatter().string(from: Date()),
-            "source": "macos-openclaw-config-file",
+            "source": "macos-opennexus-config-file",
             "event": "config.write",
             "pid": ProcessInfo.processInfo.processIdentifier,
             "argv": Array(ProcessInfo.processInfo.arguments.prefix(8)),

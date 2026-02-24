@@ -1,13 +1,13 @@
 import AppKit
-import OpenClawProtocol
+import OpenNexusProtocol
 import Foundation
 import Testing
 
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite(.serialized)
 struct LowCoverageHelperTests {
-    private typealias ProtoAnyCodable = OpenClawProtocol.AnyCodable
+    private typealias ProtoAnyCodable = OpenNexusProtocol.AnyCodable
 
     @Test func anyCodableHelperAccessors() throws {
         let payload: [String: ProtoAnyCodable] = [

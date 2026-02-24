@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/imessage",
+  "name": "@opennexus/imessage",
   "version": "2026.2.23",
   "private": true,
-  "description": "OpenClaw iMessage channel plugin",
+  "description": "OpenNexus iMessage channel plugin",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "opennexus": "workspace:*"
   },
-  "openclaw": {
+  "opennexus": {
     "extensions": [
       "./index.ts"
     ]

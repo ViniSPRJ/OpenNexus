@@ -1,7 +1,7 @@
 ---
-summary: "Symptom first troubleshooting hub for OpenClaw"
+summary: "Symptom first troubleshooting hub for OpenNexus"
 read_when:
-  - OpenClaw is not working and you need the fastest path to a fix
+  - OpenNexus is not working and you need the fastest path to a fix
   - You want a triage flow before diving into deep runbooks
 title: "Troubleshooting"
 ---
@@ -15,30 +15,30 @@ If you only have 2 minutes, use this page as a triage front door.
 Run this exact ladder in order:
 
 ```bash
-openclaw status
-openclaw status --all
-openclaw gateway probe
-openclaw gateway status
-openclaw doctor
-openclaw channels status --probe
-openclaw logs --follow
+opennexus status
+opennexus status --all
+opennexus gateway probe
+opennexus gateway status
+opennexus doctor
+opennexus channels status --probe
+opennexus logs --follow
 ```
 
 Good output in one line:
 
-- `openclaw status` → shows configured channels and no obvious auth errors.
-- `openclaw status --all` → full report is present and shareable.
-- `openclaw gateway probe` → expected gateway target is reachable.
-- `openclaw gateway status` → `Runtime: running` and `RPC probe: ok`.
-- `openclaw doctor` → no blocking config/service errors.
-- `openclaw channels status --probe` → channels report `connected` or `ready`.
-- `openclaw logs --follow` → steady activity, no repeating fatal errors.
+- `opennexus status` → shows configured channels and no obvious auth errors.
+- `opennexus status --all` → full report is present and shareable.
+- `opennexus gateway probe` → expected gateway target is reachable.
+- `opennexus gateway status` → `Runtime: running` and `RPC probe: ok`.
+- `opennexus doctor` → no blocking config/service errors.
+- `opennexus channels status --probe` → channels report `connected` or `ready`.
+- `opennexus logs --follow` → steady activity, no repeating fatal errors.
 
 ## Decision tree
 
 ```mermaid
 flowchart TD
-  A[OpenClaw is not working] --> B{What breaks first}
+  A[OpenNexus is not working] --> B{What breaks first}
   B --> C[No replies]
   B --> D[Dashboard or Control UI will not connect]
   B --> E[Gateway will not start or service not running]
@@ -59,11 +59,11 @@ flowchart TD
 <AccordionGroup>
   <Accordion title="No replies">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw channels status --probe
-    openclaw pairing list <channel>
-    openclaw logs --follow
+    opennexus status
+    opennexus gateway status
+    opennexus channels status --probe
+    opennexus pairing list <channel>
+    opennexus logs --follow
     ```
 
     Good output looks like:
@@ -89,16 +89,16 @@ flowchart TD
 
   <Accordion title="Dashboard or Control UI will not connect">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw logs --follow
-    openclaw doctor
-    openclaw channels status --probe
+    opennexus status
+    opennexus gateway status
+    opennexus logs --follow
+    opennexus doctor
+    opennexus channels status --probe
     ```
 
     Good output looks like:
 
-    - `Dashboard: http://...` is shown in `openclaw gateway status`
+    - `Dashboard: http://...` is shown in `opennexus gateway status`
     - `RPC probe: ok`
     - No auth loop in logs
 
@@ -118,11 +118,11 @@ flowchart TD
 
   <Accordion title="Gateway will not start or service installed but not running">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw logs --follow
-    openclaw doctor
-    openclaw channels status --probe
+    opennexus status
+    opennexus gateway status
+    opennexus logs --follow
+    opennexus doctor
+    opennexus channels status --probe
     ```
 
     Good output looks like:
@@ -147,11 +147,11 @@ flowchart TD
 
   <Accordion title="Channel connects but messages do not flow">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw logs --follow
-    openclaw doctor
-    openclaw channels status --probe
+    opennexus status
+    opennexus gateway status
+    opennexus logs --follow
+    opennexus doctor
+    opennexus channels status --probe
     ```
 
     Good output looks like:
@@ -175,12 +175,12 @@ flowchart TD
 
   <Accordion title="Cron or heartbeat did not fire or did not deliver">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw cron status
-    openclaw cron list
-    openclaw cron runs --id <jobId> --limit 20
-    openclaw logs --follow
+    opennexus status
+    opennexus gateway status
+    opennexus cron status
+    opennexus cron list
+    opennexus cron runs --id <jobId> --limit 20
+    opennexus logs --follow
     ```
 
     Good output looks like:
@@ -206,11 +206,11 @@ flowchart TD
 
   <Accordion title="Node is paired but tool fails camera canvas screen exec">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw nodes status
-    openclaw nodes describe --node <idOrNameOrIp>
-    openclaw logs --follow
+    opennexus status
+    opennexus gateway status
+    opennexus nodes status
+    opennexus nodes describe --node <idOrNameOrIp>
+    opennexus logs --follow
     ```
 
     Good output looks like:
@@ -236,17 +236,17 @@ flowchart TD
 
   <Accordion title="Browser tool fails">
     ```bash
-    openclaw status
-    openclaw gateway status
-    openclaw browser status
-    openclaw logs --follow
-    openclaw doctor
+    opennexus status
+    opennexus gateway status
+    opennexus browser status
+    opennexus logs --follow
+    opennexus doctor
     ```
 
     Good output looks like:
 
     - Browser status shows `running: true` and a chosen browser/profile.
-    - `openclaw` profile starts or `chrome` relay has an attached tab.
+    - `opennexus` profile starts or `chrome` relay has an attached tab.
 
     Common log signatures:
 

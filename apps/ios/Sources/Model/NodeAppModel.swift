@@ -1,6 +1,6 @@
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import OpenNexusChatUI
+import OpenNexusKit
+import OpenNexusProtocol
 import Observation
 import os
 import SwiftUI
@@ -40,10 +40,10 @@ private final class NotificationInvokeLatch<T: Sendable>: @unchecked Sendable {
 @MainActor
 @Observable
 final class NodeAppModel {
-    private let deepLinkLogger = Logger(subsystem: "ai.openclaw.ios", category: "DeepLink")
-    private let pushWakeLogger = Logger(subsystem: "ai.openclaw.ios", category: "PushWake")
-    private let locationWakeLogger = Logger(subsystem: "ai.openclaw.ios", category: "LocationWake")
-    private let watchReplyLogger = Logger(subsystem: "ai.openclaw.ios", category: "WatchReply")
+    private let deepLinkLogger = Logger(subsystem: "ai.opennexus.ios", category: "DeepLink")
+    private let pushWakeLogger = Logger(subsystem: "ai.opennexus.ios", category: "PushWake")
+    private let locationWakeLogger = Logger(subsystem: "ai.opennexus.ios", category: "LocationWake")
+    private let watchReplyLogger = Logger(subsystem: "ai.opennexus.ios", category: "WatchReply")
     enum CameraHUDKind {
         case photo
         case recording
@@ -213,7 +213,7 @@ final class NodeAppModel {
         }()
         guard !userAction.isEmpty else { return }
 
-        guard let name = OpenClawCanvasA2UIAction.extractActionName(userAction) else { return }
+        guard let name = OpenNexusCanvasA2UIAction.extractActionName(userAction) else { return }
         let actionId: String = {
             let id = (userAction["id"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             return id.isEmpty ? UUID().uuidString : id
@@ -235,15 +235,15 @@ final class NodeAppModel {
             deviceName: UIDevice.current.name,
             interfaceIdiom: UIDevice.current.userInterfaceIdiom)
         let instanceId = (UserDefaults.standard.string(forKey: "node.instanceId") ?? "ios-node").lowercased()
-        let contextJSON = OpenClawCanvasA2UIAction.compactJSON(userAction["context"])
+        let contextJSON = OpenNexusCanvasA2UIAction.compactJSON(userAction["context"])
         let sessionKey = self.mainSessionKey
 
-        let messageContext = OpenClawCanvasA2UIAction.AgentMessageContext(
+        let messageContext = OpenNexusCanvasA2UIAction.AgentMessageContext(
             actionName: name,
             session: .init(key: sessionKey, surfaceId: surfaceId),
             component: .init(id: sourceComponentId, host: host, instanceId: instanceId),
             contextJSON: contextJSON)
-        let message = OpenClawCanvasA2UIAction.formatAgentMessage(messageContext)
+        let message = OpenNexusCanvasA2UIAction.formatAgentMessage(messageContext)
 
         let ok: Bool
         var errorText: String?
@@ -268,7 +268,7 @@ final class NodeAppModel {
             }
         }
 
-        let js = OpenClawCanvasA2UIAction.jsDispatchA2UIActionStatus(actionId: actionId, ok: ok, error: errorText)
+        let js = OpenNexusCanvasA2UIAction.jsDispatchA2UIActionStatus(actionId: actionId, ok: ok, error: errorText)
         do {
             _ = try await self.screen.eval(javaScript: js)
         } catch {
@@ -472,7 +472,7 @@ final class NodeAppModel {
         }
     }
 
-    func requestLocationPermissions(mode: OpenClawLocationMode) async -> Bool {
+    func requestLocationPermissions(mode: OpenNexusLocationMode) async -> Bool {
         guard mode != .off else { return true }
         let status = await self.locationService.ensureAuthorization(mode: mode)
         switch status {
@@ -667,7 +667,7 @@ final class NodeAppModel {
                 if await self.isGatewayHealthMonitorDisabled() { return true }
                 do {
                     let data = try await self.operatorGateway.request(method: "health", paramsJSON: nil, timeoutSeconds: 6)
-                    guard let decoded = try? JSONDecoder().decode(OpenClawGatewayHealthOK.self, from: data) else {
+                    guard let decoded = try? JSONDecoder().decode(OpenNexusGatewayHealthOK.self, from: data) else {
                         return false
                     }
                     return decoded.ok ?? false
@@ -796,7 +796,7 @@ final class NodeAppModel {
         }
 
         // iOS gateway forwards to the gateway; no local auth prompts here.
-        // (Key-based unattended auth is handled on macOS for openclaw:// links.)
+        // (Key-based unattended auth is handled on macOS for opennexus:// links.)
         let data = try JSONEncoder().encode(link)
         guard let json = String(bytes: data, encoding: .utf8) else {
             throw NSError(domain: "NodeAppModel", code: 2, userInfo: [
@@ -817,7 +817,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: OpenNexusNodeError(
                     code: .backgroundUnavailable,
                     message: "NODE_BACKGROUND_UNAVAILABLE: canvas/camera/screen commands require foreground"))
         }
@@ -826,7 +826,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: OpenNexusNodeError(
                     code: .unavailable,
                     message: "CAMERA_DISABLED: enable Camera in iOS Settings → Camera → Allow Camera"))
         }
@@ -839,12 +839,12 @@ final class NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                    error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
             case .handlerUnavailable:
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(code: .unavailable, message: "node handler unavailable"))
+                    error: OpenNexusNodeError(code: .unavailable, message: "node handler unavailable"))
             }
         } catch {
             if command.hasPrefix("camera.") {
@@ -854,7 +854,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: error.localizedDescription))
+                error: OpenNexusNodeError(code: .unavailable, message: error.localizedDescription))
         }
     }
 
@@ -869,7 +869,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: OpenNexusNodeError(
                     code: .unavailable,
                     message: "LOCATION_DISABLED: enable Location in Settings"))
         }
@@ -877,12 +877,12 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: OpenNexusNodeError(
                     code: .backgroundUnavailable,
                     message: "LOCATION_BACKGROUND_UNAVAILABLE: background location requires Always"))
         }
-        let params = (try? Self.decodeParams(OpenClawLocationGetParams.self, from: req.paramsJSON)) ??
-            OpenClawLocationGetParams()
+        let params = (try? Self.decodeParams(OpenNexusLocationGetParams.self, from: req.paramsJSON)) ??
+            OpenNexusLocationGetParams()
         let desired = params.desiredAccuracy ??
             (self.isLocationPreciseEnabled() ? .precise : .balanced)
         let status = self.locationService.authorizationStatus()
@@ -890,7 +890,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: OpenNexusNodeError(
                     code: .unavailable,
                     message: "LOCATION_PERMISSION_REQUIRED: grant Location permission"))
         }
@@ -898,7 +898,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(
+                error: OpenNexusNodeError(
                     code: .unavailable,
                     message: "LOCATION_PERMISSION_REQUIRED: enable Always for background access"))
         }
@@ -908,7 +908,7 @@ final class NodeAppModel {
             maxAgeMs: params.maxAgeMs,
             timeoutMs: params.timeoutMs)
         let isPrecise = self.locationService.accuracyAuthorization() == .fullAccuracy
-        let payload = OpenClawLocationPayload(
+        let payload = OpenNexusLocationPayload(
             lat: location.coordinate.latitude,
             lon: location.coordinate.longitude,
             accuracyMeters: location.horizontalAccuracy,
@@ -924,10 +924,10 @@ final class NodeAppModel {
 
     private func handleCanvasInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawCanvasCommand.present.rawValue:
+        case OpenNexusCanvasCommand.present.rawValue:
             // iOS ignores placement hints; canvas always fills the screen.
-            let params = (try? Self.decodeParams(OpenClawCanvasPresentParams.self, from: req.paramsJSON)) ??
-                OpenClawCanvasPresentParams()
+            let params = (try? Self.decodeParams(OpenNexusCanvasPresentParams.self, from: req.paramsJSON)) ??
+                OpenNexusCanvasPresentParams()
             let url = params.url?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if url.isEmpty {
                 self.screen.showDefaultCanvas()
@@ -935,20 +935,20 @@ final class NodeAppModel {
                 self.screen.navigate(to: url)
             }
             return BridgeInvokeResponse(id: req.id, ok: true)
-        case OpenClawCanvasCommand.hide.rawValue:
+        case OpenNexusCanvasCommand.hide.rawValue:
             self.screen.showDefaultCanvas()
             return BridgeInvokeResponse(id: req.id, ok: true)
-        case OpenClawCanvasCommand.navigate.rawValue:
-            let params = try Self.decodeParams(OpenClawCanvasNavigateParams.self, from: req.paramsJSON)
+        case OpenNexusCanvasCommand.navigate.rawValue:
+            let params = try Self.decodeParams(OpenNexusCanvasNavigateParams.self, from: req.paramsJSON)
             self.screen.navigate(to: params.url)
             return BridgeInvokeResponse(id: req.id, ok: true)
-        case OpenClawCanvasCommand.evalJS.rawValue:
-            let params = try Self.decodeParams(OpenClawCanvasEvalParams.self, from: req.paramsJSON)
+        case OpenNexusCanvasCommand.evalJS.rawValue:
+            let params = try Self.decodeParams(OpenNexusCanvasEvalParams.self, from: req.paramsJSON)
             let result = try await self.screen.eval(javaScript: params.javaScript)
             let payload = try Self.encodePayload(["result": result])
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case OpenClawCanvasCommand.snapshot.rawValue:
-            let params = try? Self.decodeParams(OpenClawCanvasSnapshotParams.self, from: req.paramsJSON)
+        case OpenNexusCanvasCommand.snapshot.rawValue:
+            let params = try? Self.decodeParams(OpenNexusCanvasSnapshotParams.self, from: req.paramsJSON)
             let format = params?.format ?? .jpeg
             let maxWidth: CGFloat? = {
                 if let raw = params?.maxWidth, raw > 0 { return CGFloat(raw) }
@@ -972,19 +972,19 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handleCanvasA2UIInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         let command = req.command
         switch command {
-        case OpenClawCanvasA2UICommand.reset.rawValue:
+        case OpenNexusCanvasA2UICommand.reset.rawValue:
             guard let a2uiUrl = await self.resolveA2UIHostURL() else {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: OpenNexusNodeError(
                         code: .unavailable,
                         message: "A2UI_HOST_NOT_CONFIGURED: gateway did not advertise canvas host"))
             }
@@ -993,32 +993,32 @@ final class NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: OpenNexusNodeError(
                         code: .unavailable,
                         message: "A2UI_HOST_UNAVAILABLE: A2UI host not reachable"))
             }
 
             let json = try await self.screen.eval(javaScript: """
             (() => {
-              const host = globalThis.openclawA2UI;
-              if (!host) return JSON.stringify({ ok: false, error: "missing openclawA2UI" });
+              const host = globalThis.opennexusA2UI;
+              if (!host) return JSON.stringify({ ok: false, error: "missing opennexusA2UI" });
               return JSON.stringify(host.reset());
             })()
             """)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawCanvasA2UICommand.push.rawValue, OpenClawCanvasA2UICommand.pushJSONL.rawValue:
-            let messages: [OpenClawKit.AnyCodable]
-            if command == OpenClawCanvasA2UICommand.pushJSONL.rawValue {
-                let params = try Self.decodeParams(OpenClawCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
-                messages = try OpenClawCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
+        case OpenNexusCanvasA2UICommand.push.rawValue, OpenNexusCanvasA2UICommand.pushJSONL.rawValue:
+            let messages: [OpenNexusKit.AnyCodable]
+            if command == OpenNexusCanvasA2UICommand.pushJSONL.rawValue {
+                let params = try Self.decodeParams(OpenNexusCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
+                messages = try OpenNexusCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
             } else {
                 do {
-                    let params = try Self.decodeParams(OpenClawCanvasA2UIPushParams.self, from: req.paramsJSON)
+                    let params = try Self.decodeParams(OpenNexusCanvasA2UIPushParams.self, from: req.paramsJSON)
                     messages = params.messages
                 } catch {
                     // Be forgiving: some clients still send JSONL payloads to `canvas.a2ui.push`.
-                    let params = try Self.decodeParams(OpenClawCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
-                    messages = try OpenClawCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
+                    let params = try Self.decodeParams(OpenNexusCanvasA2UIPushJSONLParams.self, from: req.paramsJSON)
+                    messages = try OpenNexusCanvasA2UIJSONL.decodeMessagesFromJSONL(params.jsonl)
                 }
             }
 
@@ -1026,7 +1026,7 @@ final class NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: OpenNexusNodeError(
                         code: .unavailable,
                         message: "A2UI_HOST_NOT_CONFIGURED: gateway did not advertise canvas host"))
             }
@@ -1035,17 +1035,17 @@ final class NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: OpenNexusNodeError(
                         code: .unavailable,
                         message: "A2UI_HOST_UNAVAILABLE: A2UI host not reachable"))
             }
 
-            let messagesJSON = try OpenClawCanvasA2UIJSONL.encodeMessagesJSONArray(messages)
+            let messagesJSON = try OpenNexusCanvasA2UIJSONL.encodeMessagesJSONArray(messages)
             let js = """
             (() => {
               try {
-                const host = globalThis.openclawA2UI;
-                if (!host) return JSON.stringify({ ok: false, error: "missing openclawA2UI" });
+                const host = globalThis.opennexusA2UI;
+                if (!host) return JSON.stringify({ ok: false, error: "missing opennexusA2UI" });
                 const messages = \(messagesJSON);
                 return JSON.stringify(host.applyMessages(messages));
               } catch (e) {
@@ -1059,24 +1059,24 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handleCameraInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawCameraCommand.list.rawValue:
+        case OpenNexusCameraCommand.list.rawValue:
             let devices = await self.camera.listDevices()
             struct Payload: Codable {
                 var devices: [CameraController.CameraDeviceInfo]
             }
             let payload = try Self.encodePayload(Payload(devices: devices))
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case OpenClawCameraCommand.snap.rawValue:
+        case OpenNexusCameraCommand.snap.rawValue:
             self.showCameraHUD(text: "Taking photo…", kind: .photo)
             self.triggerCameraFlash()
-            let params = (try? Self.decodeParams(OpenClawCameraSnapParams.self, from: req.paramsJSON)) ??
-                OpenClawCameraSnapParams()
+            let params = (try? Self.decodeParams(OpenNexusCameraSnapParams.self, from: req.paramsJSON)) ??
+                OpenNexusCameraSnapParams()
             let res = try await self.camera.snap(params: params)
 
             struct Payload: Codable {
@@ -1092,9 +1092,9 @@ final class NodeAppModel {
                 height: res.height))
             self.showCameraHUD(text: "Photo captured", kind: .success, autoHideSeconds: 1.6)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: payload)
-        case OpenClawCameraCommand.clip.rawValue:
-            let params = (try? Self.decodeParams(OpenClawCameraClipParams.self, from: req.paramsJSON)) ??
-                OpenClawCameraClipParams()
+        case OpenNexusCameraCommand.clip.rawValue:
+            let params = (try? Self.decodeParams(OpenNexusCameraClipParams.self, from: req.paramsJSON)) ??
+                OpenNexusCameraClipParams()
 
             let suspended = (params.includeAudio ?? true) ? self.voiceWake.suspendForExternalAudioCapture() : false
             defer { self.voiceWake.resumeAfterExternalAudioCapture(wasSuspended: suspended) }
@@ -1119,13 +1119,13 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handleScreenRecordInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = (try? Self.decodeParams(OpenClawScreenRecordParams.self, from: req.paramsJSON)) ??
-            OpenClawScreenRecordParams()
+        let params = (try? Self.decodeParams(OpenNexusScreenRecordParams.self, from: req.paramsJSON)) ??
+            OpenNexusScreenRecordParams()
         if let format = params.format, format.lowercased() != "mp4" {
             throw NSError(domain: "Screen", code: 30, userInfo: [
                 NSLocalizedDescriptionKey: "INVALID_REQUEST: screen format must be mp4",
@@ -1161,14 +1161,14 @@ final class NodeAppModel {
     }
 
     private func handleSystemNotify(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = try Self.decodeParams(OpenClawSystemNotifyParams.self, from: req.paramsJSON)
+        let params = try Self.decodeParams(OpenNexusSystemNotifyParams.self, from: req.paramsJSON)
         let title = params.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let body = params.body.trimmingCharacters(in: .whitespacesAndNewlines)
         if title.isEmpty, body.isEmpty {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty notification"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty notification"))
         }
 
         let finalStatus = await self.requestNotificationAuthorizationIfNeeded()
@@ -1176,7 +1176,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: "NOT_AUTHORIZED: notifications"))
+                error: OpenNexusNodeError(code: .unavailable, message: "NOT_AUTHORIZED: notifications"))
         }
 
         let addResult = await self.runNotificationCall(timeoutSeconds: 2.0) { [notificationCenter] in
@@ -1209,19 +1209,19 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
+                error: OpenNexusNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
         }
         return BridgeInvokeResponse(id: req.id, ok: true)
     }
 
     private func handleChatPushInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = try Self.decodeParams(OpenClawChatPushParams.self, from: req.paramsJSON)
+        let params = try Self.decodeParams(OpenNexusChatPushParams.self, from: req.paramsJSON)
         let text = params.text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty chat.push text"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: empty chat.push text"))
         }
 
         let finalStatus = await self.requestNotificationAuthorizationIfNeeded()
@@ -1229,7 +1229,7 @@ final class NodeAppModel {
         if finalStatus == .authorized || finalStatus == .provisional || finalStatus == .ephemeral {
             let addResult = await self.runNotificationCall(timeoutSeconds: 2.0) { [notificationCenter] in
                 let content = UNMutableNotificationContent()
-                content.title = "OpenClaw"
+                content.title = "OpenNexus"
                 content.body = text
                 content.sound = .default
                 content.userInfo = ["messageId": messageId]
@@ -1243,7 +1243,7 @@ final class NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
+                    error: OpenNexusNodeError(code: .unavailable, message: "NOTIFICATION_FAILED: \(error.message)"))
             }
         }
 
@@ -1254,7 +1254,7 @@ final class NodeAppModel {
             }
         }
 
-        let payload = OpenClawChatPushPayload(messageId: messageId)
+        let payload = OpenNexusChatPushPayload(messageId: messageId)
         let json = try Self.encodePayload(payload)
         return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
     }
@@ -1316,11 +1316,11 @@ final class NodeAppModel {
 
     private func handleDeviceInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawDeviceCommand.status.rawValue:
+        case OpenNexusDeviceCommand.status.rawValue:
             let payload = try await self.deviceStatusService.status()
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawDeviceCommand.info.rawValue:
+        case OpenNexusDeviceCommand.info.rawValue:
             let payload = self.deviceStatusService.info()
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
@@ -1328,13 +1328,13 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handlePhotosInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
-        let params = (try? Self.decodeParams(OpenClawPhotosLatestParams.self, from: req.paramsJSON)) ??
-            OpenClawPhotosLatestParams()
+        let params = (try? Self.decodeParams(OpenNexusPhotosLatestParams.self, from: req.paramsJSON)) ??
+            OpenNexusPhotosLatestParams()
         let payload = try await self.photosService.latest(params: params)
         let json = try Self.encodePayload(payload)
         return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
@@ -1342,14 +1342,14 @@ final class NodeAppModel {
 
     private func handleContactsInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawContactsCommand.search.rawValue:
-            let params = (try? Self.decodeParams(OpenClawContactsSearchParams.self, from: req.paramsJSON)) ??
-                OpenClawContactsSearchParams()
+        case OpenNexusContactsCommand.search.rawValue:
+            let params = (try? Self.decodeParams(OpenNexusContactsSearchParams.self, from: req.paramsJSON)) ??
+                OpenNexusContactsSearchParams()
             let payload = try await self.contactsService.search(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawContactsCommand.add.rawValue:
-            let params = try Self.decodeParams(OpenClawContactsAddParams.self, from: req.paramsJSON)
+        case OpenNexusContactsCommand.add.rawValue:
+            let params = try Self.decodeParams(OpenNexusContactsAddParams.self, from: req.paramsJSON)
             let payload = try await self.contactsService.add(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
@@ -1357,20 +1357,20 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handleCalendarInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawCalendarCommand.events.rawValue:
-            let params = (try? Self.decodeParams(OpenClawCalendarEventsParams.self, from: req.paramsJSON)) ??
-                OpenClawCalendarEventsParams()
+        case OpenNexusCalendarCommand.events.rawValue:
+            let params = (try? Self.decodeParams(OpenNexusCalendarEventsParams.self, from: req.paramsJSON)) ??
+                OpenNexusCalendarEventsParams()
             let payload = try await self.calendarService.events(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawCalendarCommand.add.rawValue:
-            let params = try Self.decodeParams(OpenClawCalendarAddParams.self, from: req.paramsJSON)
+        case OpenNexusCalendarCommand.add.rawValue:
+            let params = try Self.decodeParams(OpenNexusCalendarAddParams.self, from: req.paramsJSON)
             let payload = try await self.calendarService.add(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
@@ -1378,20 +1378,20 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handleRemindersInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawRemindersCommand.list.rawValue:
-            let params = (try? Self.decodeParams(OpenClawRemindersListParams.self, from: req.paramsJSON)) ??
-                OpenClawRemindersListParams()
+        case OpenNexusRemindersCommand.list.rawValue:
+            let params = (try? Self.decodeParams(OpenNexusRemindersListParams.self, from: req.paramsJSON)) ??
+                OpenNexusRemindersListParams()
             let payload = try await self.remindersService.list(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawRemindersCommand.add.rawValue:
-            let params = try Self.decodeParams(OpenClawRemindersAddParams.self, from: req.paramsJSON)
+        case OpenNexusRemindersCommand.add.rawValue:
+            let params = try Self.decodeParams(OpenNexusRemindersAddParams.self, from: req.paramsJSON)
             let payload = try await self.remindersService.add(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
@@ -1399,21 +1399,21 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handleMotionInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawMotionCommand.activity.rawValue:
-            let params = (try? Self.decodeParams(OpenClawMotionActivityParams.self, from: req.paramsJSON)) ??
-                OpenClawMotionActivityParams()
+        case OpenNexusMotionCommand.activity.rawValue:
+            let params = (try? Self.decodeParams(OpenNexusMotionActivityParams.self, from: req.paramsJSON)) ??
+                OpenNexusMotionActivityParams()
             let payload = try await self.motionService.activities(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawMotionCommand.pedometer.rawValue:
-            let params = (try? Self.decodeParams(OpenClawPedometerParams.self, from: req.paramsJSON)) ??
-                OpenClawPedometerParams()
+        case OpenNexusMotionCommand.pedometer.rawValue:
+            let params = (try? Self.decodeParams(OpenNexusPedometerParams.self, from: req.paramsJSON)) ??
+                OpenNexusPedometerParams()
             let payload = try await self.motionService.pedometer(params: params)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
@@ -1421,30 +1421,30 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
     private func handleTalkInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawTalkCommand.pttStart.rawValue:
+        case OpenNexusTalkCommand.pttStart.rawValue:
             self.pttVoiceWakeSuspended = self.voiceWake.suspendForExternalAudioCapture()
             let payload = try await self.talkMode.beginPushToTalk()
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawTalkCommand.pttStop.rawValue:
+        case OpenNexusTalkCommand.pttStop.rawValue:
             let payload = await self.talkMode.endPushToTalk()
             self.voiceWake.resumeAfterExternalAudioCapture(wasSuspended: self.pttVoiceWakeSuspended)
             self.pttVoiceWakeSuspended = false
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawTalkCommand.pttCancel.rawValue:
+        case OpenNexusTalkCommand.pttCancel.rawValue:
             let payload = await self.talkMode.cancelPushToTalk()
             self.voiceWake.resumeAfterExternalAudioCapture(wasSuspended: self.pttVoiceWakeSuspended)
             self.pttVoiceWakeSuspended = false
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawTalkCommand.pttOnce.rawValue:
+        case OpenNexusTalkCommand.pttOnce.rawValue:
             self.pttVoiceWakeSuspended = self.voiceWake.suspendForExternalAudioCapture()
             defer {
                 self.voiceWake.resumeAfterExternalAudioCapture(wasSuspended: self.pttVoiceWakeSuspended)
@@ -1457,7 +1457,7 @@ final class NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
@@ -1474,113 +1474,113 @@ private extension NodeAppModel {
             }
         }
 
-        register([OpenClawLocationCommand.get.rawValue]) { [weak self] req in
+        register([OpenNexusLocationCommand.get.rawValue]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleLocationInvoke(req)
         }
 
         register([
-            OpenClawCanvasCommand.present.rawValue,
-            OpenClawCanvasCommand.hide.rawValue,
-            OpenClawCanvasCommand.navigate.rawValue,
-            OpenClawCanvasCommand.evalJS.rawValue,
-            OpenClawCanvasCommand.snapshot.rawValue,
+            OpenNexusCanvasCommand.present.rawValue,
+            OpenNexusCanvasCommand.hide.rawValue,
+            OpenNexusCanvasCommand.navigate.rawValue,
+            OpenNexusCanvasCommand.evalJS.rawValue,
+            OpenNexusCanvasCommand.snapshot.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleCanvasInvoke(req)
         }
 
         register([
-            OpenClawCanvasA2UICommand.reset.rawValue,
-            OpenClawCanvasA2UICommand.push.rawValue,
-            OpenClawCanvasA2UICommand.pushJSONL.rawValue,
+            OpenNexusCanvasA2UICommand.reset.rawValue,
+            OpenNexusCanvasA2UICommand.push.rawValue,
+            OpenNexusCanvasA2UICommand.pushJSONL.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleCanvasA2UIInvoke(req)
         }
 
         register([
-            OpenClawCameraCommand.list.rawValue,
-            OpenClawCameraCommand.snap.rawValue,
-            OpenClawCameraCommand.clip.rawValue,
+            OpenNexusCameraCommand.list.rawValue,
+            OpenNexusCameraCommand.snap.rawValue,
+            OpenNexusCameraCommand.clip.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleCameraInvoke(req)
         }
 
-        register([OpenClawScreenCommand.record.rawValue]) { [weak self] req in
+        register([OpenNexusScreenCommand.record.rawValue]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleScreenRecordInvoke(req)
         }
 
-        register([OpenClawSystemCommand.notify.rawValue]) { [weak self] req in
+        register([OpenNexusSystemCommand.notify.rawValue]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleSystemNotify(req)
         }
 
-        register([OpenClawChatCommand.push.rawValue]) { [weak self] req in
+        register([OpenNexusChatCommand.push.rawValue]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleChatPushInvoke(req)
         }
 
         register([
-            OpenClawDeviceCommand.status.rawValue,
-            OpenClawDeviceCommand.info.rawValue,
+            OpenNexusDeviceCommand.status.rawValue,
+            OpenNexusDeviceCommand.info.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleDeviceInvoke(req)
         }
 
         register([
-            OpenClawWatchCommand.status.rawValue,
-            OpenClawWatchCommand.notify.rawValue,
+            OpenNexusWatchCommand.status.rawValue,
+            OpenNexusWatchCommand.notify.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleWatchInvoke(req)
         }
 
-        register([OpenClawPhotosCommand.latest.rawValue]) { [weak self] req in
+        register([OpenNexusPhotosCommand.latest.rawValue]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handlePhotosInvoke(req)
         }
 
         register([
-            OpenClawContactsCommand.search.rawValue,
-            OpenClawContactsCommand.add.rawValue,
+            OpenNexusContactsCommand.search.rawValue,
+            OpenNexusContactsCommand.add.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleContactsInvoke(req)
         }
 
         register([
-            OpenClawCalendarCommand.events.rawValue,
-            OpenClawCalendarCommand.add.rawValue,
+            OpenNexusCalendarCommand.events.rawValue,
+            OpenNexusCalendarCommand.add.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleCalendarInvoke(req)
         }
 
         register([
-            OpenClawRemindersCommand.list.rawValue,
-            OpenClawRemindersCommand.add.rawValue,
+            OpenNexusRemindersCommand.list.rawValue,
+            OpenNexusRemindersCommand.add.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleRemindersInvoke(req)
         }
 
         register([
-            OpenClawMotionCommand.activity.rawValue,
-            OpenClawMotionCommand.pedometer.rawValue,
+            OpenNexusMotionCommand.activity.rawValue,
+            OpenNexusMotionCommand.pedometer.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleMotionInvoke(req)
         }
 
         register([
-            OpenClawTalkCommand.pttStart.rawValue,
-            OpenClawTalkCommand.pttStop.rawValue,
-            OpenClawTalkCommand.pttCancel.rawValue,
-            OpenClawTalkCommand.pttOnce.rawValue,
+            OpenNexusTalkCommand.pttStart.rawValue,
+            OpenNexusTalkCommand.pttStop.rawValue,
+            OpenNexusTalkCommand.pttCancel.rawValue,
+            OpenNexusTalkCommand.pttOnce.rawValue,
         ]) { [weak self] req in
             guard let self else { throw NodeCapabilityRouter.RouterError.handlerUnavailable }
             return try await self.handleTalkInvoke(req)
@@ -1591,9 +1591,9 @@ private extension NodeAppModel {
 
     func handleWatchInvoke(_ req: BridgeInvokeRequest) async throws -> BridgeInvokeResponse {
         switch req.command {
-        case OpenClawWatchCommand.status.rawValue:
+        case OpenNexusWatchCommand.status.rawValue:
             let status = await self.watchMessagingService.status()
-            let payload = OpenClawWatchStatusPayload(
+            let payload = OpenNexusWatchStatusPayload(
                 supported: status.supported,
                 paired: status.paired,
                 appInstalled: status.appInstalled,
@@ -1601,15 +1601,15 @@ private extension NodeAppModel {
                 activationState: status.activationState)
             let json = try Self.encodePayload(payload)
             return BridgeInvokeResponse(id: req.id, ok: true, payloadJSON: json)
-        case OpenClawWatchCommand.notify.rawValue:
-            let params = try Self.decodeParams(OpenClawWatchNotifyParams.self, from: req.paramsJSON)
+        case OpenNexusWatchCommand.notify.rawValue:
+            let params = try Self.decodeParams(OpenNexusWatchNotifyParams.self, from: req.paramsJSON)
             let title = params.title.trimmingCharacters(in: .whitespacesAndNewlines)
             let body = params.body.trimmingCharacters(in: .whitespacesAndNewlines)
             if title.isEmpty && body.isEmpty {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: OpenNexusNodeError(
                         code: .invalidRequest,
                         message: "INVALID_REQUEST: empty watch notification"))
             }
@@ -1626,7 +1626,7 @@ private extension NodeAppModel {
                             sendResult: result)
                     }
                 }
-                let payload = OpenClawWatchNotifyPayload(
+                let payload = OpenNexusWatchNotifyPayload(
                     deliveredImmediately: result.deliveredImmediately,
                     queuedForDelivery: result.queuedForDelivery,
                     transport: result.transport)
@@ -1636,7 +1636,7 @@ private extension NodeAppModel {
                 return BridgeInvokeResponse(
                     id: req.id,
                     ok: false,
-                    error: OpenClawNodeError(
+                    error: OpenNexusNodeError(
                         code: .unavailable,
                         message: error.localizedDescription))
             }
@@ -1644,13 +1644,13 @@ private extension NodeAppModel {
             return BridgeInvokeResponse(
                 id: req.id,
                 ok: false,
-                error: OpenClawNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
+                error: OpenNexusNodeError(code: .invalidRequest, message: "INVALID_REQUEST: unknown command"))
         }
     }
 
-    func locationMode() -> OpenClawLocationMode {
+    func locationMode() -> OpenNexusLocationMode {
         let raw = UserDefaults.standard.string(forKey: "location.enabledMode") ?? "off"
-        return OpenClawLocationMode(rawValue: raw) ?? .off
+        return OpenNexusLocationMode(rawValue: raw) ?? .off
     }
 
     func isLocationPreciseEnabled() -> Bool {
@@ -1925,7 +1925,7 @@ private extension NodeAppModel {
                             BridgeInvokeResponse(
                                 id: req.id,
                                 ok: false,
-                                error: OpenClawNodeError(
+                                error: OpenNexusNodeError(
                                     code: .invalidRequest,
                                     message: "INVALID_REQUEST: operator session cannot invoke node commands"))
                         })
@@ -2042,7 +2042,7 @@ private extension NodeAppModel {
                                 return BridgeInvokeResponse(
                                     id: req.id,
                                     ok: false,
-                                    error: OpenClawNodeError(
+                                    error: OpenNexusNodeError(
                                         code: .unavailable,
                                         message: "UNAVAILABLE: node not ready"))
                             }
@@ -2105,9 +2105,9 @@ private extension NodeAppModel {
                             self.gatewayPairingRequestId = requestId
                             if let requestId, !requestId.isEmpty {
                                 self.gatewayStatusText =
-                                    "Pairing required (requestId: \(requestId)). Approve on gateway and return to OpenClaw."
+                                    "Pairing required (requestId: \(requestId)). Approve on gateway and return to OpenNexus."
                             } else {
-                                self.gatewayStatusText = "Pairing required. Approve on gateway and return to OpenClaw."
+                                self.gatewayStatusText = "Pairing required. Approve on gateway and return to OpenNexus."
                             }
                         }
                         // Hard stop the underlying WebSocket watchdog reconnects so the UI stays stable and
@@ -2161,7 +2161,7 @@ private extension NodeAppModel {
 
     func legacyClientIdFallback(currentClientId: String, error: Error) -> String? {
         let normalizedClientId = currentClientId.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard normalizedClientId == "openclaw-ios" else { return nil }
+        guard normalizedClientId == "opennexus-ios" else { return nil }
         let message = error.localizedDescription.lowercased()
         guard message.contains("invalid connect params"), message.contains("/client/id") else {
             return nil
@@ -2237,8 +2237,8 @@ extension NodeAppModel {
         self.recordShareEvent("Share self-test running…")
 
         let payload = SharedContentPayload(
-            title: "OpenClaw Share Self-Test",
-            url: URL(string: "https://openclaw.ai/share-self-test"),
+            title: "OpenNexus Share Self-Test",
+            url: URL(string: "https://opennexus.ai/share-self-test"),
             text: "Validate iOS share->deep-link->gateway forwarding.")
         guard let deepLink = ShareToAgentDeepLink.buildURL(
             from: payload,
@@ -2363,7 +2363,7 @@ extension NodeAppModel {
             self.pushWakeLogger.info("Ignored APNs payload wakeId=\(wakeId, privacy: .public): not silent push")
             return false
         }
-        let pushKind = Self.openclawPushKind(userInfo)
+        let pushKind = Self.opennexusPushKind(userInfo)
         self.pushWakeLogger.info(
             "Silent push received wakeId=\(wakeId, privacy: .public) kind=\(pushKind, privacy: .public) backgrounded=\(self.isBackgrounded, privacy: .public) autoReconnect=\(self.gatewayAutoReconnectEnabled, privacy: .public)")
         let result = await self.reconnectGatewaySessionsForSilentPushIfNeeded(wakeId: wakeId)
@@ -2485,14 +2485,14 @@ extension NodeAppModel {
         return String(raw.prefix(8))
     }
 
-    private static func openclawPushKind(_ userInfo: [AnyHashable: Any]) -> String {
-        if let payload = userInfo["openclaw"] as? [String: Any],
+    private static func opennexusPushKind(_ userInfo: [AnyHashable: Any]) -> String {
+        if let payload = userInfo["opennexus"] as? [String: Any],
            let kind = payload["kind"] as? String
         {
             let trimmed = kind.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty { return trimmed }
         }
-        if let payload = userInfo["openclaw"] as? [AnyHashable: Any],
+        if let payload = userInfo["opennexus"] as? [AnyHashable: Any],
            let kind = payload["kind"] as? String
         {
             let trimmed = kind.trimmingCharacters(in: .whitespacesAndNewlines)

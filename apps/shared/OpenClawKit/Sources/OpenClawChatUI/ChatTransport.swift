@@ -1,44 +1,44 @@
 import Foundation
 
-public enum OpenClawChatTransportEvent: Sendable {
+public enum OpenNexusChatTransportEvent: Sendable {
     case health(ok: Bool)
     case tick
-    case chat(OpenClawChatEventPayload)
-    case agent(OpenClawAgentEventPayload)
+    case chat(OpenNexusChatEventPayload)
+    case agent(OpenNexusAgentEventPayload)
     case seqGap
 }
 
-public protocol OpenClawChatTransport: Sendable {
-    func requestHistory(sessionKey: String) async throws -> OpenClawChatHistoryPayload
+public protocol OpenNexusChatTransport: Sendable {
+    func requestHistory(sessionKey: String) async throws -> OpenNexusChatHistoryPayload
     func sendMessage(
         sessionKey: String,
         message: String,
         thinking: String,
         idempotencyKey: String,
-        attachments: [OpenClawChatAttachmentPayload]) async throws -> OpenClawChatSendResponse
+        attachments: [OpenNexusChatAttachmentPayload]) async throws -> OpenNexusChatSendResponse
 
     func abortRun(sessionKey: String, runId: String) async throws
-    func listSessions(limit: Int?) async throws -> OpenClawChatSessionsListResponse
+    func listSessions(limit: Int?) async throws -> OpenNexusChatSessionsListResponse
 
     func requestHealth(timeoutMs: Int) async throws -> Bool
-    func events() -> AsyncStream<OpenClawChatTransportEvent>
+    func events() -> AsyncStream<OpenNexusChatTransportEvent>
 
     func setActiveSessionKey(_ sessionKey: String) async throws
 }
 
-extension OpenClawChatTransport {
+extension OpenNexusChatTransport {
     public func setActiveSessionKey(_: String) async throws {}
 
     public func abortRun(sessionKey _: String, runId _: String) async throws {
         throw NSError(
-            domain: "OpenClawChatTransport",
+            domain: "OpenNexusChatTransport",
             code: 0,
             userInfo: [NSLocalizedDescriptionKey: "chat.abort not supported by this transport"])
     }
 
-    public func listSessions(limit _: Int?) async throws -> OpenClawChatSessionsListResponse {
+    public func listSessions(limit _: Int?) async throws -> OpenNexusChatSessionsListResponse {
         throw NSError(
-            domain: "OpenClawChatTransport",
+            domain: "OpenNexusChatTransport",
             code: 0,
             userInfo: [NSLocalizedDescriptionKey: "sessions.list not supported by this transport"])
     }

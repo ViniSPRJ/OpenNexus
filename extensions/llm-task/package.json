@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/llm-task",
+  "name": "@opennexus/llm-task",
   "version": "2026.2.23",
   "private": true,
-  "description": "OpenClaw JSON-only LLM task plugin",
+  "description": "OpenNexus JSON-only LLM task plugin",
   "type": "module",
-  "openclaw": {
+  "opennexus": {
     "extensions": [
       "./index.ts"
     ]

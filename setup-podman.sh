@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-# One-time host setup for rootless OpenClaw in Podman: creates the openclaw
+# One-time host setup for rootless OpenNexus in Podman: creates the opennexus
 # user, builds the image, loads it into that user's Podman store, and installs
 # the launch script. Run from repo root with sudo capability.
 #
 # Usage: ./setup-podman.sh [--quadlet|--container]
 #   --quadlet   Install systemd Quadlet so the container runs as a user service
 #   --container Only install user + image + launch script; you start the container manually (default)
-#   Or set OPENCLAW_PODMAN_QUADLET=1 (or 0) to choose without a flag.
+#   Or set OPENNEXUS_PODMAN_QUADLET=1 (or 0) to choose without a flag.
 #
 # After this, start the gateway manually:
-#   ./scripts/run-openclaw-podman.sh launch
-#   ./scripts/run-openclaw-podman.sh launch setup   # onboarding wizard
-# Or as the openclaw user: sudo -u openclaw /home/openclaw/run-openclaw-podman.sh
-# If you used --quadlet, you can also: sudo systemctl --machine openclaw@ --user start openclaw.service
+#   ./scripts/run-opennexus-podman.sh launch
+#   ./scripts/run-opennexus-podman.sh launch setup   # onboarding wizard
+# Or as the opennexus user: sudo -u opennexus /home/opennexus/run-opennexus-podman.sh
+# If you used --quadlet, you can also: sudo systemctl --machine opennexus@ --user start opennexus.service
 set -euo pipefail
 
-OPENCLAW_USER="${OPENCLAW_PODMAN_USER:-openclaw}"
-REPO_PATH="${OPENCLAW_REPO_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
-RUN_SCRIPT_SRC="$REPO_PATH/scripts/run-openclaw-podman.sh"
-QUADLET_TEMPLATE="$REPO_PATH/scripts/podman/openclaw.container.in"
+OPENNEXUS_USER="${OPENNEXUS_PODMAN_USER:-opennexus}"
+REPO_PATH="${OPENNEXUS_REPO_PATH:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
+RUN_SCRIPT_SRC="$REPO_PATH/scripts/run-opennexus-podman.sh"
+QUADLET_TEMPLATE="$REPO_PATH/scripts/podman/opennexus.container.in"
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -50,13 +50,13 @@ run_as_user() {
   fi
 }
 
-run_as_openclaw() {
-  # Avoid root writes into $OPENCLAW_HOME (symlink/hardlink/TOCTOU footguns).
+run_as_opennexus() {
+  # Avoid root writes into $OPENNEXUS_HOME (symlink/hardlink/TOCTOU footguns).
   # Anything under the target user's home should be created/modified as that user.
-  run_as_user "$OPENCLAW_USER" env HOME="$OPENCLAW_HOME" "$@"
+  run_as_user "$OPENNEXUS_USER" env HOME="$OPENNEXUS_HOME" "$@"
 }
 
-# Quadlet: opt-in via --quadlet or OPENCLAW_PODMAN_QUADLET=1
+# Quadlet: opt-in via --quadlet or OPENNEXUS_PODMAN_QUADLET=1
 INSTALL_QUADLET=false
 for arg in "$@"; do
   case "$arg" in
@@ -64,8 +64,8 @@ for arg in "$@"; do
     --container) INSTALL_QUADLET=false ;;
   esac
 done
-if [[ -n "${OPENCLAW_PODMAN_QUADLET:-}" ]]; then
-  case "${OPENCLAW_PODMAN_QUADLET,,}" in
+if [[ -n "${OPENNEXUS_PODMAN_QUADLET:-}" ]]; then
+  case "${OPENNEXUS_PODMAN_QUADLET,,}" in
     1|yes|true)  INSTALL_QUADLET=true ;;
     0|no|false) INSTALL_QUADLET=false ;;
   esac
@@ -76,7 +76,7 @@ if ! is_root; then
   require_cmd sudo
 fi
 if [[ ! -f "$REPO_PATH/Dockerfile" ]]; then
-  echo "Dockerfile not found at $REPO_PATH. Set OPENCLAW_REPO_PATH to the repo root." >&2
+  echo "Dockerfile not found at $REPO_PATH. Set OPENNEXUS_REPO_PATH to the repo root." >&2
   exit 1
 fi
 if [[ ! -f "$RUN_SCRIPT_SRC" ]]; then
@@ -101,7 +101,7 @@ PY
     od -An -N32 -tx1 /dev/urandom | tr -d " \n"
     return 0
   fi
-  echo "Missing dependency: need openssl or python3 (or od) to generate OPENCLAW_GATEWAY_TOKEN." >&2
+  echo "Missing dependency: need openssl or python3 (or od) to generate OPENNEXUS_GATEWAY_TOKEN." >&2
   exit 1
 }
 
@@ -138,100 +138,100 @@ resolve_nologin_shell() {
   printf '%s' "/usr/sbin/nologin"
 }
 
-# Create openclaw user (non-login, with home) if missing
-if ! user_exists "$OPENCLAW_USER"; then
+# Create opennexus user (non-login, with home) if missing
+if ! user_exists "$OPENNEXUS_USER"; then
   NOLOGIN_SHELL="$(resolve_nologin_shell)"
-  echo "Creating user $OPENCLAW_USER ($NOLOGIN_SHELL, with home)..."
+  echo "Creating user $OPENNEXUS_USER ($NOLOGIN_SHELL, with home)..."
   if command -v useradd >/dev/null 2>&1; then
-    run_root useradd -m -s "$NOLOGIN_SHELL" "$OPENCLAW_USER"
+    run_root useradd -m -s "$NOLOGIN_SHELL" "$OPENNEXUS_USER"
   elif command -v adduser >/dev/null 2>&1; then
     # Debian/Ubuntu: adduser supports --disabled-password/--gecos. Busybox adduser differs.
-    run_root adduser --disabled-password --gecos "" --shell "$NOLOGIN_SHELL" "$OPENCLAW_USER"
+    run_root adduser --disabled-password --gecos "" --shell "$NOLOGIN_SHELL" "$OPENNEXUS_USER"
   else
-    echo "Neither useradd nor adduser found, cannot create user $OPENCLAW_USER." >&2
+    echo "Neither useradd nor adduser found, cannot create user $OPENNEXUS_USER." >&2
     exit 1
   fi
 else
-  echo "User $OPENCLAW_USER already exists."
+  echo "User $OPENNEXUS_USER already exists."
 fi
 
-OPENCLAW_HOME="$(resolve_user_home "$OPENCLAW_USER")"
-OPENCLAW_UID="$(id -u "$OPENCLAW_USER" 2>/dev/null || true)"
-OPENCLAW_CONFIG="$OPENCLAW_HOME/.openclaw"
-LAUNCH_SCRIPT_DST="$OPENCLAW_HOME/run-openclaw-podman.sh"
+OPENNEXUS_HOME="$(resolve_user_home "$OPENNEXUS_USER")"
+OPENNEXUS_UID="$(id -u "$OPENNEXUS_USER" 2>/dev/null || true)"
+OPENNEXUS_CONFIG="$OPENNEXUS_HOME/.opennexus"
+LAUNCH_SCRIPT_DST="$OPENNEXUS_HOME/run-opennexus-podman.sh"
 
 # Prefer systemd user services (Quadlet) for production. Enable lingering early so rootless Podman can run
 # without an interactive login.
 if command -v loginctl &>/dev/null; then
-  run_root loginctl enable-linger "$OPENCLAW_USER" 2>/dev/null || true
+  run_root loginctl enable-linger "$OPENNEXUS_USER" 2>/dev/null || true
 fi
-if [[ -n "${OPENCLAW_UID:-}" && -d /run/user ]] && command -v systemctl &>/dev/null; then
-  run_root systemctl start "user@${OPENCLAW_UID}.service" 2>/dev/null || true
+if [[ -n "${OPENNEXUS_UID:-}" && -d /run/user ]] && command -v systemctl &>/dev/null; then
+  run_root systemctl start "user@${OPENNEXUS_UID}.service" 2>/dev/null || true
 fi
 
 # Rootless Podman needs subuid/subgid for the run user
-if ! grep -q "^${OPENCLAW_USER}:" /etc/subuid 2>/dev/null; then
-  echo "Warning: $OPENCLAW_USER has no subuid range. Rootless Podman may fail." >&2
-  echo "  Add a line to /etc/subuid and /etc/subgid, e.g.: $OPENCLAW_USER:100000:65536" >&2
+if ! grep -q "^${OPENNEXUS_USER}:" /etc/subuid 2>/dev/null; then
+  echo "Warning: $OPENNEXUS_USER has no subuid range. Rootless Podman may fail." >&2
+  echo "  Add a line to /etc/subuid and /etc/subgid, e.g.: $OPENNEXUS_USER:100000:65536" >&2
 fi
 
-echo "Creating $OPENCLAW_CONFIG and workspace..."
-run_as_openclaw mkdir -p "$OPENCLAW_CONFIG/workspace"
-run_as_openclaw chmod 700 "$OPENCLAW_CONFIG" "$OPENCLAW_CONFIG/workspace" 2>/dev/null || true
+echo "Creating $OPENNEXUS_CONFIG and workspace..."
+run_as_opennexus mkdir -p "$OPENNEXUS_CONFIG/workspace"
+run_as_opennexus chmod 700 "$OPENNEXUS_CONFIG" "$OPENNEXUS_CONFIG/workspace" 2>/dev/null || true
 
-ENV_FILE="$OPENCLAW_CONFIG/.env"
-if run_as_openclaw test -f "$ENV_FILE"; then
-  if ! run_as_openclaw grep -q '^OPENCLAW_GATEWAY_TOKEN=' "$ENV_FILE" 2>/dev/null; then
+ENV_FILE="$OPENNEXUS_CONFIG/.env"
+if run_as_opennexus test -f "$ENV_FILE"; then
+  if ! run_as_opennexus grep -q '^OPENNEXUS_GATEWAY_TOKEN=' "$ENV_FILE" 2>/dev/null; then
     TOKEN="$(generate_token_hex_32)"
-    printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_openclaw tee -a "$ENV_FILE" >/dev/null
-    echo "Added OPENCLAW_GATEWAY_TOKEN to $ENV_FILE."
+    printf 'OPENNEXUS_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_opennexus tee -a "$ENV_FILE" >/dev/null
+    echo "Added OPENNEXUS_GATEWAY_TOKEN to $ENV_FILE."
   fi
-  run_as_openclaw chmod 600 "$ENV_FILE" 2>/dev/null || true
+  run_as_opennexus chmod 600 "$ENV_FILE" 2>/dev/null || true
 else
   TOKEN="$(generate_token_hex_32)"
-  printf 'OPENCLAW_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_openclaw tee "$ENV_FILE" >/dev/null
-  run_as_openclaw chmod 600 "$ENV_FILE" 2>/dev/null || true
+  printf 'OPENNEXUS_GATEWAY_TOKEN=%s\n' "$TOKEN" | run_as_opennexus tee "$ENV_FILE" >/dev/null
+  run_as_opennexus chmod 600 "$ENV_FILE" 2>/dev/null || true
   echo "Created $ENV_FILE with new token."
 fi
 
 # The gateway refuses to start unless gateway.mode=local is set in config.
 # Make first-run non-interactive; users can run the wizard later to configure channels/providers.
-OPENCLAW_JSON="$OPENCLAW_CONFIG/openclaw.json"
-if ! run_as_openclaw test -f "$OPENCLAW_JSON"; then
-  printf '%s\n' '{ gateway: { mode: "local" } }' | run_as_openclaw tee "$OPENCLAW_JSON" >/dev/null
-  run_as_openclaw chmod 600 "$OPENCLAW_JSON" 2>/dev/null || true
-  echo "Created $OPENCLAW_JSON (minimal gateway.mode=local)."
+OPENNEXUS_JSON="$OPENNEXUS_CONFIG/opennexus.json"
+if ! run_as_opennexus test -f "$OPENNEXUS_JSON"; then
+  printf '%s\n' '{ gateway: { mode: "local" } }' | run_as_opennexus tee "$OPENNEXUS_JSON" >/dev/null
+  run_as_opennexus chmod 600 "$OPENNEXUS_JSON" 2>/dev/null || true
+  echo "Created $OPENNEXUS_JSON (minimal gateway.mode=local)."
 fi
 
 echo "Building image from $REPO_PATH..."
-podman build -t openclaw:local -f "$REPO_PATH/Dockerfile" "$REPO_PATH"
+podman build -t opennexus:local -f "$REPO_PATH/Dockerfile" "$REPO_PATH"
 
-echo "Loading image into $OPENCLAW_USER's Podman store..."
-TMP_IMAGE="$(mktemp -p /tmp openclaw-image.XXXXXX.tar)"
+echo "Loading image into $OPENNEXUS_USER's Podman store..."
+TMP_IMAGE="$(mktemp -p /tmp opennexus-image.XXXXXX.tar)"
 trap 'rm -f "$TMP_IMAGE"' EXIT
-podman save openclaw:local -o "$TMP_IMAGE"
+podman save opennexus:local -o "$TMP_IMAGE"
 chmod 644 "$TMP_IMAGE"
-(cd /tmp && run_as_user "$OPENCLAW_USER" env HOME="$OPENCLAW_HOME" podman load -i "$TMP_IMAGE")
+(cd /tmp && run_as_user "$OPENNEXUS_USER" env HOME="$OPENNEXUS_HOME" podman load -i "$TMP_IMAGE")
 rm -f "$TMP_IMAGE"
 trap - EXIT
 
 echo "Copying launch script to $LAUNCH_SCRIPT_DST..."
-run_root cat "$RUN_SCRIPT_SRC" | run_as_openclaw tee "$LAUNCH_SCRIPT_DST" >/dev/null
-run_as_openclaw chmod 755 "$LAUNCH_SCRIPT_DST"
+run_root cat "$RUN_SCRIPT_SRC" | run_as_opennexus tee "$LAUNCH_SCRIPT_DST" >/dev/null
+run_as_opennexus chmod 755 "$LAUNCH_SCRIPT_DST"
 
-# Optionally install systemd quadlet for openclaw user (rootless Podman + systemd)
-QUADLET_DIR="$OPENCLAW_HOME/.config/containers/systemd"
+# Optionally install systemd quadlet for opennexus user (rootless Podman + systemd)
+QUADLET_DIR="$OPENNEXUS_HOME/.config/containers/systemd"
 if [[ "$INSTALL_QUADLET" == true && -f "$QUADLET_TEMPLATE" ]]; then
-  echo "Installing systemd quadlet for $OPENCLAW_USER..."
-  run_as_openclaw mkdir -p "$QUADLET_DIR"
-  OPENCLAW_HOME_SED="$(printf '%s' "$OPENCLAW_HOME" | sed -e 's/[\\/&|]/\\\\&/g')"
-  sed "s|{{OPENCLAW_HOME}}|$OPENCLAW_HOME_SED|g" "$QUADLET_TEMPLATE" | run_as_openclaw tee "$QUADLET_DIR/openclaw.container" >/dev/null
-  run_as_openclaw chmod 700 "$OPENCLAW_HOME/.config" "$OPENCLAW_HOME/.config/containers" "$QUADLET_DIR" 2>/dev/null || true
-  run_as_openclaw chmod 600 "$QUADLET_DIR/openclaw.container" 2>/dev/null || true
+  echo "Installing systemd quadlet for $OPENNEXUS_USER..."
+  run_as_opennexus mkdir -p "$QUADLET_DIR"
+  OPENNEXUS_HOME_SED="$(printf '%s' "$OPENNEXUS_HOME" | sed -e 's/[\\/&|]/\\\\&/g')"
+  sed "s|{{OPENNEXUS_HOME}}|$OPENNEXUS_HOME_SED|g" "$QUADLET_TEMPLATE" | run_as_opennexus tee "$QUADLET_DIR/opennexus.container" >/dev/null
+  run_as_opennexus chmod 700 "$OPENNEXUS_HOME/.config" "$OPENNEXUS_HOME/.config/containers" "$QUADLET_DIR" 2>/dev/null || true
+  run_as_opennexus chmod 600 "$QUADLET_DIR/opennexus.container" 2>/dev/null || true
   if command -v systemctl &>/dev/null; then
-    run_root systemctl --machine "${OPENCLAW_USER}@" --user daemon-reload 2>/dev/null || true
-    run_root systemctl --machine "${OPENCLAW_USER}@" --user enable openclaw.service 2>/dev/null || true
-    run_root systemctl --machine "${OPENCLAW_USER}@" --user start openclaw.service 2>/dev/null || true
+    run_root systemctl --machine "${OPENNEXUS_USER}@" --user daemon-reload 2>/dev/null || true
+    run_root systemctl --machine "${OPENNEXUS_USER}@" --user enable opennexus.service 2>/dev/null || true
+    run_root systemctl --machine "${OPENNEXUS_USER}@" --user start opennexus.service 2>/dev/null || true
   fi
 fi
 
@@ -239,13 +239,13 @@ echo ""
 echo "Setup complete. Start the gateway:"
 echo "  $RUN_SCRIPT_SRC launch"
 echo "  $RUN_SCRIPT_SRC launch setup   # onboarding wizard"
-echo "Or as $OPENCLAW_USER (e.g. from cron):"
-echo "  sudo -u $OPENCLAW_USER $LAUNCH_SCRIPT_DST"
-echo "  sudo -u $OPENCLAW_USER $LAUNCH_SCRIPT_DST setup"
+echo "Or as $OPENNEXUS_USER (e.g. from cron):"
+echo "  sudo -u $OPENNEXUS_USER $LAUNCH_SCRIPT_DST"
+echo "  sudo -u $OPENNEXUS_USER $LAUNCH_SCRIPT_DST setup"
 if [[ "$INSTALL_QUADLET" == true ]]; then
   echo "Or use systemd (quadlet):"
-  echo "  sudo systemctl --machine ${OPENCLAW_USER}@ --user start openclaw.service"
-  echo "  sudo systemctl --machine ${OPENCLAW_USER}@ --user status openclaw.service"
+  echo "  sudo systemctl --machine ${OPENNEXUS_USER}@ --user start opennexus.service"
+  echo "  sudo systemctl --machine ${OPENNEXUS_USER}@ --user status opennexus.service"
 else
   echo "To install systemd quadlet later: $0 --quadlet"
 fi

@@ -1,8 +1,8 @@
 import AppKit
 import Observation
-import OpenClawDiscovery
-import OpenClawIPC
-import OpenClawKit
+import OpenNexusDiscovery
+import OpenNexusIPC
+import OpenNexusKit
 import SwiftUI
 
 struct GeneralSettings: View {
@@ -29,8 +29,8 @@ struct GeneralSettings: View {
             VStack(alignment: .leading, spacing: 18) {
                 VStack(alignment: .leading, spacing: 12) {
                     SettingsToggleRow(
-                        title: "OpenClaw active",
-                        subtitle: "Pause to stop the OpenClaw gateway; no messages will be processed.",
+                        title: "OpenNexus active",
+                        subtitle: "Pause to stop the OpenNexus gateway; no messages will be processed.",
                         binding: self.activeBinding)
 
                     self.connectionSection
@@ -39,12 +39,12 @@ struct GeneralSettings: View {
 
                     SettingsToggleRow(
                         title: "Launch at login",
-                        subtitle: "Automatically start OpenClaw after you sign in.",
+                        subtitle: "Automatically start OpenNexus after you sign in.",
                         binding: self.$state.launchAtLogin)
 
                     SettingsToggleRow(
                         title: "Show Dock icon",
-                        subtitle: "Keep OpenClaw visible in the Dock instead of menu-bar-only mode.",
+                        subtitle: "Keep OpenNexus visible in the Dock instead of menu-bar-only mode.",
                         binding: self.$state.showDockIcon)
 
                     SettingsToggleRow(
@@ -76,7 +76,7 @@ struct GeneralSettings: View {
                 Spacer(minLength: 12)
                 HStack {
                     Spacer()
-                    Button("Quit OpenClaw") { NSApp.terminate(nil) }
+                    Button("Quit OpenNexus") { NSApp.terminate(nil) }
                         .buttonStyle(.borderedProminent)
                 }
             }
@@ -103,7 +103,7 @@ struct GeneralSettings: View {
 
     private var connectionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("OpenClaw runs")
+            Text("OpenNexus runs")
                 .font(.title3.weight(.semibold))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -172,12 +172,12 @@ struct GeneralSettings: View {
                                 .frame(width: 280)
                         }
                         LabeledContent("Project root") {
-                            TextField("/home/you/Projects/openclaw", text: self.$state.remoteProjectRoot)
+                            TextField("/home/you/Projects/opennexus", text: self.$state.remoteProjectRoot)
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 280)
                         }
                         LabeledContent("CLI path") {
-                            TextField("/Applications/OpenClaw.app/.../openclaw", text: self.$state.remoteCliPath)
+                            TextField("/Applications/OpenNexus.app/.../opennexus", text: self.$state.remoteCliPath)
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 280)
                         }
@@ -664,7 +664,7 @@ extension GeneralSettings {
         let alert = NSAlert()
         alert.messageText = "Log file not found"
         alert.informativeText = """
-        Looked for openclaw logs in /tmp/openclaw/.
+        Looked for opennexus logs in /tmp/opennexus/.
         Run a health check or send a message to generate activity, then try again.
         """
         alert.alertStyle = .informational
@@ -681,11 +681,11 @@ extension GeneralSettings {
             self.state.remoteTarget = GatewayDiscoveryHelpers.sshTarget(for: gateway) ?? ""
         }
         if let endpoint = GatewayDiscoveryHelpers.serviceEndpoint(for: gateway) {
-            OpenClawConfigFile.setRemoteGatewayUrl(
+            OpenNexusConfigFile.setRemoteGatewayUrl(
                 host: endpoint.host,
                 port: endpoint.port)
         } else {
-            OpenClawConfigFile.clearRemoteGatewayUrl()
+            OpenNexusConfigFile.clearRemoteGatewayUrl()
         }
     }
 }
@@ -713,8 +713,8 @@ extension GeneralSettings {
         state.remoteTarget = "user@host:2222"
         state.remoteUrl = "wss://gateway.example.ts.net"
         state.remoteIdentity = "/tmp/id_ed25519"
-        state.remoteProjectRoot = "/tmp/openclaw"
-        state.remoteCliPath = "/tmp/openclaw"
+        state.remoteProjectRoot = "/tmp/opennexus"
+        state.remoteCliPath = "/tmp/opennexus"
 
         let view = GeneralSettings(state: state)
         view.gatewayStatus = GatewayEnvironmentStatus(

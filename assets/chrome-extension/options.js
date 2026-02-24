@@ -19,7 +19,7 @@ async function deriveRelayToken(gatewayToken, port) {
     'raw', enc.encode(gatewayToken), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   )
   const sig = await crypto.subtle.sign(
-    'HMAC', key, enc.encode(`openclaw-extension-relay-v1:${port}`),
+    'HMAC', key, enc.encode(`opennexus-extension-relay-v1:${port}`),
   )
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('')
 }
@@ -41,7 +41,7 @@ async function checkRelayReachable(port, token) {
   try {
     const relayToken = await deriveRelayToken(trimmedToken, port)
     // Delegate the fetch to the background service worker to bypass
-    // CORS preflight on the custom x-openclaw-relay-token header.
+    // CORS preflight on the custom x-opennexus-relay-token header.
     const res = await chrome.runtime.sendMessage({
       type: 'relayCheck',
       url,
@@ -58,7 +58,7 @@ async function checkRelayReachable(port, token) {
   } catch {
     setStatus(
       'error',
-      `Relay not reachable/authenticated at http://127.0.0.1:${port}/. Start OpenClaw browser relay and verify token.`,
+      `Relay not reachable/authenticated at http://127.0.0.1:${port}/. Start OpenNexus browser relay and verify token.`,
     )
   }
 }

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadCronStore, resolveCronStorePath } from "./store.js";
 
 async function makeStorePath() {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cron-store-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "opennexus-cron-store-"));
   return {
     dir,
     storePath: path.join(dir, "jobs.json"),
@@ -20,12 +20,12 @@ describe("resolveCronStorePath", () => {
     vi.unstubAllEnvs();
   });
 
-  it("uses OPENCLAW_HOME for tilde expansion", () => {
-    vi.stubEnv("OPENCLAW_HOME", "/srv/openclaw-home");
+  it("uses OPENNEXUS_HOME for tilde expansion", () => {
+    vi.stubEnv("OPENNEXUS_HOME", "/srv/opennexus-home");
     vi.stubEnv("HOME", "/home/other");
 
     const result = resolveCronStorePath("~/cron/jobs.json");
-    expect(result).toBe(path.resolve("/srv/openclaw-home", "cron", "jobs.json"));
+    expect(result).toBe(path.resolve("/srv/opennexus-home", "cron", "jobs.json"));
   });
 });
 

@@ -1,4 +1,4 @@
-package ai.openclaw.android.gateway
+package ai.opennexus.android.gateway
 
 data class GatewayEndpoint(
   val stableId: String,

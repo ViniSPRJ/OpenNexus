@@ -1,4 +1,4 @@
-import OpenClawIPC
+import OpenNexusIPC
 import Foundation
 import Testing
 

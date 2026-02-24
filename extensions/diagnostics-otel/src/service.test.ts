@@ -98,19 +98,19 @@ vi.mock("@opentelemetry/semantic-conventions", () => ({
   ATTR_SERVICE_NAME: "service.name",
 }));
 
-vi.mock("openclaw/plugin-sdk", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk")>("openclaw/plugin-sdk");
+vi.mock("opennexus/plugin-sdk", async () => {
+  const actual = await vi.importActual<typeof import("opennexus/plugin-sdk")>("opennexus/plugin-sdk");
   return {
     ...actual,
     registerLogTransport: registerLogTransportMock,
   };
 });
 
-import type { OpenClawPluginServiceContext } from "openclaw/plugin-sdk";
-import { emitDiagnosticEvent } from "openclaw/plugin-sdk";
+import type { OpenNexusPluginServiceContext } from "opennexus/plugin-sdk";
+import { emitDiagnosticEvent } from "opennexus/plugin-sdk";
 import { createDiagnosticsOtelService } from "./service.js";
 
-const OTEL_TEST_STATE_DIR = "/tmp/openclaw-diagnostics-otel-test";
+const OTEL_TEST_STATE_DIR = "/tmp/opennexus-diagnostics-otel-test";
 const OTEL_TEST_ENDPOINT = "http://otel-collector:4318";
 const OTEL_TEST_PROTOCOL = "http/protobuf";
 
@@ -131,7 +131,7 @@ type OtelContextFlags = {
 function createOtelContext(
   endpoint: string,
   { traces = false, metrics = false, logs = false }: OtelContextFlags = {},
-): OpenClawPluginServiceContext {
+): OpenNexusPluginServiceContext {
   return {
     config: {
       diagnostics: {
@@ -151,7 +151,7 @@ function createOtelContext(
   };
 }
 
-function createTraceOnlyContext(endpoint: string): OpenClawPluginServiceContext {
+function createTraceOnlyContext(endpoint: string): OpenNexusPluginServiceContext {
   return createOtelContext(endpoint, { traces: true });
 }
 
@@ -241,26 +241,26 @@ describe("diagnostics-otel service", () => {
       attempt: 2,
     });
 
-    expect(telemetryState.counters.get("openclaw.webhook.received")?.add).toHaveBeenCalled();
+    expect(telemetryState.counters.get("opennexus.webhook.received")?.add).toHaveBeenCalled();
     expect(
-      telemetryState.histograms.get("openclaw.webhook.duration_ms")?.record,
+      telemetryState.histograms.get("opennexus.webhook.duration_ms")?.record,
     ).toHaveBeenCalled();
-    expect(telemetryState.counters.get("openclaw.message.queued")?.add).toHaveBeenCalled();
-    expect(telemetryState.counters.get("openclaw.message.processed")?.add).toHaveBeenCalled();
+    expect(telemetryState.counters.get("opennexus.message.queued")?.add).toHaveBeenCalled();
+    expect(telemetryState.counters.get("opennexus.message.processed")?.add).toHaveBeenCalled();
     expect(
-      telemetryState.histograms.get("openclaw.message.duration_ms")?.record,
+      telemetryState.histograms.get("opennexus.message.duration_ms")?.record,
     ).toHaveBeenCalled();
-    expect(telemetryState.histograms.get("openclaw.queue.wait_ms")?.record).toHaveBeenCalled();
-    expect(telemetryState.counters.get("openclaw.session.stuck")?.add).toHaveBeenCalled();
+    expect(telemetryState.histograms.get("opennexus.queue.wait_ms")?.record).toHaveBeenCalled();
+    expect(telemetryState.counters.get("opennexus.session.stuck")?.add).toHaveBeenCalled();
     expect(
-      telemetryState.histograms.get("openclaw.session.stuck_age_ms")?.record,
+      telemetryState.histograms.get("opennexus.session.stuck_age_ms")?.record,
     ).toHaveBeenCalled();
-    expect(telemetryState.counters.get("openclaw.run.attempt")?.add).toHaveBeenCalled();
+    expect(telemetryState.counters.get("opennexus.run.attempt")?.add).toHaveBeenCalled();
 
     const spanNames = telemetryState.tracer.startSpan.mock.calls.map((call) => call[0]);
-    expect(spanNames).toContain("openclaw.webhook.processed");
-    expect(spanNames).toContain("openclaw.message.processed");
-    expect(spanNames).toContain("openclaw.session.stuck");
+    expect(spanNames).toContain("opennexus.webhook.processed");
+    expect(spanNames).toContain("opennexus.message.processed");
+    expect(spanNames).toContain("opennexus.session.stuck");
 
     expect(registerLogTransportMock).toHaveBeenCalledTimes(1);
     expect(registeredTransports).toHaveLength(1);
@@ -332,7 +332,7 @@ describe("diagnostics-otel service", () => {
       _meta: { logLevelName: "DEBUG", date: new Date() },
     });
 
-    const tokenAttr = emitCall?.attributes?.["openclaw.token"];
+    const tokenAttr = emitCall?.attributes?.["opennexus.token"];
     expect(tokenAttr).not.toBe("ghp_abcdefghijklmnopqrstuvwxyz123456");
     if (typeof tokenAttr === "string") {
       expect(tokenAttr).toContain("…");
@@ -350,16 +350,16 @@ describe("diagnostics-otel service", () => {
       reason: "token=ghp_abcdefghijklmnopqrstuvwxyz123456",
     });
 
-    const sessionCounter = telemetryState.counters.get("openclaw.session.state");
+    const sessionCounter = telemetryState.counters.get("opennexus.session.state");
     expect(sessionCounter?.add).toHaveBeenCalledWith(
       1,
       expect.objectContaining({
-        "openclaw.reason": expect.stringContaining("…"),
+        "opennexus.reason": expect.stringContaining("…"),
       }),
     );
     const attrs = sessionCounter?.add.mock.calls[0]?.[1] as Record<string, unknown> | undefined;
-    expect(typeof attrs?.["openclaw.reason"]).toBe("string");
-    expect(String(attrs?.["openclaw.reason"])).not.toContain(
+    expect(typeof attrs?.["opennexus.reason"]).toBe("string");
+    expect(String(attrs?.["opennexus.reason"])).not.toContain(
       "ghp_abcdefghijklmnopqrstuvwxyz123456",
     );
     await service.stop?.(ctx);

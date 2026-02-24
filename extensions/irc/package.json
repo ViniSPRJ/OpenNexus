@@ -1,12 +1,12 @@
 {
-  "name": "@openclaw/irc",
+  "name": "@opennexus/irc",
   "version": "2026.2.23",
-  "description": "OpenClaw IRC channel plugin",
+  "description": "OpenNexus IRC channel plugin",
   "type": "module",
   "devDependencies": {
-    "openclaw": "workspace:*"
+    "opennexus": "workspace:*"
   },
-  "openclaw": {
+  "opennexus": {
     "extensions": [
       "./index.ts"
     ]

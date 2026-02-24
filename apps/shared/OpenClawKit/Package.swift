@@ -3,15 +3,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "OpenClawKit",
+    name: "OpenNexusKit",
     platforms: [
         .iOS(.v18),
         .macOS(.v15),
     ],
     products: [
-        .library(name: "OpenClawProtocol", targets: ["OpenClawProtocol"]),
-        .library(name: "OpenClawKit", targets: ["OpenClawKit"]),
-        .library(name: "OpenClawChatUI", targets: ["OpenClawChatUI"]),
+        .library(name: "OpenNexusProtocol", targets: ["OpenNexusProtocol"]),
+        .library(name: "OpenNexusKit", targets: ["OpenNexusKit"]),
+        .library(name: "OpenNexusChatUI", targets: ["OpenNexusChatUI"]),
     ],
     dependencies: [
         .package(url: "https://github.com/steipete/ElevenLabsKit", exact: "0.1.0"),
@@ -19,18 +19,18 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "OpenClawProtocol",
-            path: "Sources/OpenClawProtocol",
+            name: "OpenNexusProtocol",
+            path: "Sources/OpenNexusProtocol",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .target(
-            name: "OpenClawKit",
+            name: "OpenNexusKit",
             dependencies: [
-                "OpenClawProtocol",
+                "OpenNexusProtocol",
                 .product(name: "ElevenLabsKit", package: "ElevenLabsKit"),
             ],
-            path: "Sources/OpenClawKit",
+            path: "Sources/OpenNexusKit",
             resources: [
                 .process("Resources"),
             ],
@@ -38,22 +38,22 @@ let package = Package(
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .target(
-            name: "OpenClawChatUI",
+            name: "OpenNexusChatUI",
             dependencies: [
-                "OpenClawKit",
+                "OpenNexusKit",
                 .product(
                     name: "Textual",
                     package: "textual",
                     condition: .when(platforms: [.macOS, .iOS])),
             ],
-            path: "Sources/OpenClawChatUI",
+            path: "Sources/OpenNexusChatUI",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .testTarget(
-            name: "OpenClawKitTests",
-            dependencies: ["OpenClawKit", "OpenClawChatUI"],
-            path: "Tests/OpenClawKitTests",
+            name: "OpenNexusKitTests",
+            dependencies: ["OpenNexusKit", "OpenNexusChatUI"],
+            path: "Tests/OpenNexusKitTests",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
                 .enableExperimentalFeature("SwiftTesting"),

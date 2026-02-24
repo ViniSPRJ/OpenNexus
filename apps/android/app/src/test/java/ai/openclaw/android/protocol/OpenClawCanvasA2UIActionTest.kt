@@ -1,28 +1,28 @@
-package ai.openclaw.android.protocol
+package ai.opennexus.android.protocol
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class OpenClawCanvasA2UIActionTest {
+class OpenNexusCanvasA2UIActionTest {
   @Test
   fun extractActionNameAcceptsNameOrAction() {
     val nameObj = Json.parseToJsonElement("{\"name\":\"Hello\"}").jsonObject
-    assertEquals("Hello", OpenClawCanvasA2UIAction.extractActionName(nameObj))
+    assertEquals("Hello", OpenNexusCanvasA2UIAction.extractActionName(nameObj))
 
     val actionObj = Json.parseToJsonElement("{\"action\":\"Wave\"}").jsonObject
-    assertEquals("Wave", OpenClawCanvasA2UIAction.extractActionName(actionObj))
+    assertEquals("Wave", OpenNexusCanvasA2UIAction.extractActionName(actionObj))
 
     val fallbackObj =
       Json.parseToJsonElement("{\"name\":\"  \",\"action\":\"Fallback\"}").jsonObject
-    assertEquals("Fallback", OpenClawCanvasA2UIAction.extractActionName(fallbackObj))
+    assertEquals("Fallback", OpenNexusCanvasA2UIAction.extractActionName(fallbackObj))
   }
 
   @Test
   fun formatAgentMessageMatchesSharedSpec() {
     val msg =
-      OpenClawCanvasA2UIAction.formatAgentMessage(
+      OpenNexusCanvasA2UIAction.formatAgentMessage(
         actionName = "Get Weather",
         sessionKey = "main",
         surfaceId = "main",
@@ -40,9 +40,9 @@ class OpenClawCanvasA2UIActionTest {
 
   @Test
   fun jsDispatchA2uiStatusIsStable() {
-    val js = OpenClawCanvasA2UIAction.jsDispatchA2UIActionStatus(actionId = "a1", ok = true, error = null)
+    val js = OpenNexusCanvasA2UIAction.jsDispatchA2UIActionStatus(actionId = "a1", ok = true, error = null)
     assertEquals(
-      "window.dispatchEvent(new CustomEvent('openclaw:a2ui-action-status', { detail: { id: \"a1\", ok: true, error: \"\" } }));",
+      "window.dispatchEvent(new CustomEvent('opennexus:a2ui-action-status', { detail: { id: \"a1\", ok: true, error: \"\" } }));",
       js,
     )
   }

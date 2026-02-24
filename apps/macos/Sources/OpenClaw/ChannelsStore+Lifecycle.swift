@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawProtocol
+import OpenNexusProtocol
 
 extension ChannelsStore {
     func start() {

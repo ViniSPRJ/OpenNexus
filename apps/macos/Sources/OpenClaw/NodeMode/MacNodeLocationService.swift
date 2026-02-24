@@ -1,6 +1,6 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import OpenNexusKit
 
 @MainActor
 final class MacNodeLocationService: NSObject, CLLocationManagerDelegate {
@@ -30,7 +30,7 @@ final class MacNodeLocationService: NSObject, CLLocationManagerDelegate {
     }
 
     func currentLocation(
-        desiredAccuracy: OpenClawLocationAccuracy,
+        desiredAccuracy: OpenNexusLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {
@@ -103,7 +103,7 @@ final class MacNodeLocationService: NSObject, CLLocationManagerDelegate {
         }
     }
 
-    private static func accuracyValue(_ accuracy: OpenClawLocationAccuracy) -> CLLocationAccuracy {
+    private static func accuracyValue(_ accuracy: OpenNexusLocationAccuracy) -> CLLocationAccuracy {
         switch accuracy {
         case .coarse:
             kCLLocationAccuracyKilometer

@@ -24,11 +24,11 @@ Use this page for day-1 startup and day-2 operations of the Gateway service.
   <Step title="Start the Gateway">
 
 ```bash
-openclaw gateway --port 18789
+opennexus gateway --port 18789
 # debug/trace mirrored to stdio
-openclaw gateway --port 18789 --verbose
+opennexus gateway --port 18789 --verbose
 # force-kill listener on selected port, then start
-openclaw gateway --force
+opennexus gateway --force
 ```
 
   </Step>
@@ -36,9 +36,9 @@ openclaw gateway --force
   <Step title="Verify service health">
 
 ```bash
-openclaw gateway status
-openclaw status
-openclaw logs --follow
+opennexus gateway status
+opennexus status
+opennexus logs --follow
 ```
 
 Healthy baseline: `Runtime: running` and `RPC probe: ok`.
@@ -48,14 +48,14 @@ Healthy baseline: `Runtime: running` and `RPC probe: ok`.
   <Step title="Validate channel readiness">
 
 ```bash
-openclaw channels status --probe
+opennexus channels status --probe
 ```
 
   </Step>
 </Steps>
 
 <Note>
-Gateway config reload watches the active config file path (resolved from profile/state defaults, or `OPENCLAW_CONFIG_PATH` when set).
+Gateway config reload watches the active config file path (resolved from profile/state defaults, or `OPENNEXUS_CONFIG_PATH` when set).
 Default mode is `gateway.reload.mode="hybrid"`.
 </Note>
 
@@ -67,13 +67,13 @@ Default mode is `gateway.reload.mode="hybrid"`.
   - HTTP APIs (OpenAI-compatible, Responses, tools invoke)
   - Control UI and hooks
 - Default bind mode: `loopback`.
-- Auth is required by default (`gateway.auth.token` / `gateway.auth.password`, or `OPENCLAW_GATEWAY_TOKEN` / `OPENCLAW_GATEWAY_PASSWORD`).
+- Auth is required by default (`gateway.auth.token` / `gateway.auth.password`, or `OPENNEXUS_GATEWAY_TOKEN` / `OPENNEXUS_GATEWAY_PASSWORD`).
 
 ### Port and bind precedence
 
 | Setting      | Resolution order                                              |
 | ------------ | ------------------------------------------------------------- |
-| Gateway port | `--port` → `OPENCLAW_GATEWAY_PORT` → `gateway.port` → `18789` |
+| Gateway port | `--port` → `OPENNEXUS_GATEWAY_PORT` → `gateway.port` → `18789` |
 | Bind mode    | CLI/override → `gateway.bind` → `loopback`                    |
 
 ### Hot reload modes
@@ -88,14 +88,14 @@ Default mode is `gateway.reload.mode="hybrid"`.
 ## Operator command set
 
 ```bash
-openclaw gateway status
-openclaw gateway status --deep
-openclaw gateway status --json
-openclaw gateway install
-openclaw gateway restart
-openclaw gateway stop
-openclaw logs --follow
-openclaw doctor
+opennexus gateway status
+opennexus gateway status --deep
+opennexus gateway status --json
+opennexus gateway install
+opennexus gateway restart
+opennexus gateway stop
+opennexus logs --follow
+opennexus doctor
 ```
 
 ## Remote access
@@ -123,22 +123,22 @@ Use supervised runs for production-like reliability.
   <Tab title="macOS (launchd)">
 
 ```bash
-openclaw gateway install
-openclaw gateway status
-openclaw gateway restart
-openclaw gateway stop
+opennexus gateway install
+opennexus gateway status
+opennexus gateway restart
+opennexus gateway stop
 ```
 
-LaunchAgent labels are `ai.openclaw.gateway` (default) or `ai.openclaw.<profile>` (named profile). `openclaw doctor` audits and repairs service config drift.
+LaunchAgent labels are `ai.opennexus.gateway` (default) or `ai.opennexus.<profile>` (named profile). `opennexus doctor` audits and repairs service config drift.
 
   </Tab>
 
   <Tab title="Linux (systemd user)">
 
 ```bash
-openclaw gateway install
-systemctl --user enable --now openclaw-gateway[-<profile>].service
-openclaw gateway status
+opennexus gateway install
+systemctl --user enable --now opennexus-gateway[-<profile>].service
+opennexus gateway status
 ```
 
 For persistence after logout, enable lingering:
@@ -155,7 +155,7 @@ Use a system unit for multi-user/always-on hosts.
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now openclaw-gateway[-<profile>].service
+sudo systemctl enable --now opennexus-gateway[-<profile>].service
 ```
 
   </Tab>
@@ -169,15 +169,15 @@ Use multiple only for strict isolation/redundancy (for example a rescue profile)
 Checklist per instance:
 
 - Unique `gateway.port`
-- Unique `OPENCLAW_CONFIG_PATH`
-- Unique `OPENCLAW_STATE_DIR`
+- Unique `OPENNEXUS_CONFIG_PATH`
+- Unique `OPENNEXUS_STATE_DIR`
 - Unique `agents.defaults.workspace`
 
 Example:
 
 ```bash
-OPENCLAW_CONFIG_PATH=~/.openclaw/a.json OPENCLAW_STATE_DIR=~/.openclaw-a openclaw gateway --port 19001
-OPENCLAW_CONFIG_PATH=~/.openclaw/b.json OPENCLAW_STATE_DIR=~/.openclaw-b openclaw gateway --port 19002
+OPENNEXUS_CONFIG_PATH=~/.opennexus/a.json OPENNEXUS_STATE_DIR=~/.opennexus-a opennexus gateway --port 19001
+OPENNEXUS_CONFIG_PATH=~/.opennexus/b.json OPENNEXUS_STATE_DIR=~/.opennexus-b opennexus gateway --port 19002
 ```
 
 See: [Multiple gateways](/gateway/multiple-gateways).
@@ -185,9 +185,9 @@ See: [Multiple gateways](/gateway/multiple-gateways).
 ### Dev profile quick path
 
 ```bash
-openclaw --dev setup
-openclaw --dev gateway --allow-unconfigured
-openclaw --dev status
+opennexus --dev setup
+opennexus --dev gateway --allow-unconfigured
+opennexus --dev status
 ```
 
 Defaults include isolated state/config and base gateway port `19001`.
@@ -216,9 +216,9 @@ See full protocol docs: [Gateway Protocol](/gateway/protocol).
 ### Readiness
 
 ```bash
-openclaw gateway status
-openclaw channels status --probe
-openclaw health
+opennexus gateway status
+opennexus channels status --probe
+opennexus health
 ```
 
 ### Gap recovery

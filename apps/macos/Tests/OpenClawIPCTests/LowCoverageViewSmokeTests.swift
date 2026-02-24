@@ -1,9 +1,9 @@
 import AppKit
-import OpenClawProtocol
+import OpenNexusProtocol
 import SwiftUI
 import Testing
 
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite(.serialized)
 @MainActor

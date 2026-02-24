@@ -63,37 +63,37 @@ describe("systemd runtime parsing", () => {
 describe("resolveSystemdUserUnitPath", () => {
   it.each([
     {
-      name: "uses default service name when OPENCLAW_PROFILE is unset",
+      name: "uses default service name when OPENNEXUS_PROFILE is unset",
       env: { HOME: "/home/test" },
-      expected: "/home/test/.config/systemd/user/openclaw-gateway.service",
+      expected: "/home/test/.config/systemd/user/opennexus-gateway.service",
     },
     {
-      name: "uses profile-specific service name when OPENCLAW_PROFILE is set to a custom value",
-      env: { HOME: "/home/test", OPENCLAW_PROFILE: "jbphoenix" },
-      expected: "/home/test/.config/systemd/user/openclaw-gateway-jbphoenix.service",
+      name: "uses profile-specific service name when OPENNEXUS_PROFILE is set to a custom value",
+      env: { HOME: "/home/test", OPENNEXUS_PROFILE: "jbphoenix" },
+      expected: "/home/test/.config/systemd/user/opennexus-gateway-jbphoenix.service",
     },
     {
-      name: "prefers OPENCLAW_SYSTEMD_UNIT over OPENCLAW_PROFILE",
+      name: "prefers OPENNEXUS_SYSTEMD_UNIT over OPENNEXUS_PROFILE",
       env: {
         HOME: "/home/test",
-        OPENCLAW_PROFILE: "jbphoenix",
-        OPENCLAW_SYSTEMD_UNIT: "custom-unit",
+        OPENNEXUS_PROFILE: "jbphoenix",
+        OPENNEXUS_SYSTEMD_UNIT: "custom-unit",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
     {
-      name: "handles OPENCLAW_SYSTEMD_UNIT with .service suffix",
+      name: "handles OPENNEXUS_SYSTEMD_UNIT with .service suffix",
       env: {
         HOME: "/home/test",
-        OPENCLAW_SYSTEMD_UNIT: "custom-unit.service",
+        OPENNEXUS_SYSTEMD_UNIT: "custom-unit.service",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
     {
-      name: "trims whitespace from OPENCLAW_SYSTEMD_UNIT",
+      name: "trims whitespace from OPENNEXUS_SYSTEMD_UNIT",
       env: {
         HOME: "/home/test",
-        OPENCLAW_SYSTEMD_UNIT: "  custom-unit  ",
+        OPENNEXUS_SYSTEMD_UNIT: "  custom-unit  ",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
@@ -104,8 +104,8 @@ describe("resolveSystemdUserUnitPath", () => {
 
 describe("splitArgsPreservingQuotes", () => {
   it("splits on whitespace outside quotes", () => {
-    expect(splitArgsPreservingQuotes('/usr/bin/openclaw gateway start --name "My Bot"')).toEqual([
-      "/usr/bin/openclaw",
+    expect(splitArgsPreservingQuotes('/usr/bin/opennexus gateway start --name "My Bot"')).toEqual([
+      "/usr/bin/opennexus",
       "gateway",
       "start",
       "--name",
@@ -115,32 +115,32 @@ describe("splitArgsPreservingQuotes", () => {
 
   it("supports systemd-style backslash escaping", () => {
     expect(
-      splitArgsPreservingQuotes('openclaw --name "My \\"Bot\\"" --foo bar', {
+      splitArgsPreservingQuotes('opennexus --name "My \\"Bot\\"" --foo bar', {
         escapeMode: "backslash",
       }),
-    ).toEqual(["openclaw", "--name", 'My "Bot"', "--foo", "bar"]);
+    ).toEqual(["opennexus", "--name", 'My "Bot"', "--foo", "bar"]);
   });
 
   it("supports schtasks-style escaped quotes while preserving other backslashes", () => {
     expect(
-      splitArgsPreservingQuotes('openclaw --path "C:\\\\Program Files\\\\OpenClaw"', {
+      splitArgsPreservingQuotes('opennexus --path "C:\\\\Program Files\\\\OpenNexus"', {
         escapeMode: "backslash-quote-only",
       }),
-    ).toEqual(["openclaw", "--path", "C:\\\\Program Files\\\\OpenClaw"]);
+    ).toEqual(["opennexus", "--path", "C:\\\\Program Files\\\\OpenNexus"]);
 
     expect(
-      splitArgsPreservingQuotes('openclaw --label "My \\"Quoted\\" Name"', {
+      splitArgsPreservingQuotes('opennexus --label "My \\"Quoted\\" Name"', {
         escapeMode: "backslash-quote-only",
       }),
-    ).toEqual(["openclaw", "--label", 'My "Quoted" Name']);
+    ).toEqual(["opennexus", "--label", 'My "Quoted" Name']);
   });
 });
 
 describe("parseSystemdExecStart", () => {
   it("preserves quoted arguments", () => {
-    const execStart = '/usr/bin/openclaw gateway start --name "My Bot"';
+    const execStart = '/usr/bin/opennexus gateway start --name "My Bot"';
     expect(parseSystemdExecStart(execStart)).toEqual([
-      "/usr/bin/openclaw",
+      "/usr/bin/opennexus",
       "gateway",
       "start",
       "--name",
@@ -158,7 +158,7 @@ describe("systemd service control", () => {
     execFileMock
       .mockImplementationOnce((_cmd, _args, _opts, cb) => cb(null, "", ""))
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        expect(args).toEqual(["--user", "stop", "openclaw-gateway.service"]);
+        expect(args).toEqual(["--user", "stop", "opennexus-gateway.service"]);
         cb(null, "", "");
       });
     const write = vi.fn();
@@ -174,13 +174,13 @@ describe("systemd service control", () => {
     execFileMock
       .mockImplementationOnce((_cmd, _args, _opts, cb) => cb(null, "", ""))
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        expect(args).toEqual(["--user", "restart", "openclaw-gateway-work.service"]);
+        expect(args).toEqual(["--user", "restart", "opennexus-gateway-work.service"]);
         cb(null, "", "");
       });
     const write = vi.fn();
     const stdout = { write } as unknown as NodeJS.WritableStream;
 
-    await restartSystemdService({ stdout, env: { OPENCLAW_PROFILE: "work" } });
+    await restartSystemdService({ stdout, env: { OPENNEXUS_PROFILE: "work" } });
 
     expect(write).toHaveBeenCalledTimes(1);
     expect(String(write.mock.calls[0]?.[0])).toContain("Restarted systemd service");

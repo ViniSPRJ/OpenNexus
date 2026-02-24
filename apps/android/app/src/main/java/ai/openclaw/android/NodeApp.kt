@@ -1,4 +1,4 @@
-package ai.openclaw.android
+package ai.opennexus.android
 
 import android.app.Application
 import android.os.StrictMode

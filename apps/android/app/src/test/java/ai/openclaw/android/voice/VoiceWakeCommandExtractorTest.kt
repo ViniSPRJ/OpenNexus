@@ -1,4 +1,4 @@
-package ai.openclaw.android.voice
+package ai.opennexus.android.voice
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -7,13 +7,13 @@ import org.junit.Test
 class VoiceWakeCommandExtractorTest {
   @Test
   fun extractsCommandAfterTriggerWord() {
-    val res = VoiceWakeCommandExtractor.extractCommand("Claude take a photo", listOf("openclaw", "claude"))
+    val res = VoiceWakeCommandExtractor.extractCommand("Claude take a photo", listOf("opennexus", "claude"))
     assertEquals("take a photo", res)
   }
 
   @Test
   fun extractsCommandWithPunctuation() {
-    val res = VoiceWakeCommandExtractor.extractCommand("hey openclaw, what's the weather?", listOf("openclaw"))
+    val res = VoiceWakeCommandExtractor.extractCommand("hey opennexus, what's the weather?", listOf("opennexus"))
     assertEquals("what's the weather?", res)
   }
 

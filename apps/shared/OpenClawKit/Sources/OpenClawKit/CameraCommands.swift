@@ -1,38 +1,38 @@
 import Foundation
 
-public enum OpenClawCameraCommand: String, Codable, Sendable {
+public enum OpenNexusCameraCommand: String, Codable, Sendable {
     case list = "camera.list"
     case snap = "camera.snap"
     case clip = "camera.clip"
 }
 
-public enum OpenClawCameraFacing: String, Codable, Sendable {
+public enum OpenNexusCameraFacing: String, Codable, Sendable {
     case back
     case front
 }
 
-public enum OpenClawCameraImageFormat: String, Codable, Sendable {
+public enum OpenNexusCameraImageFormat: String, Codable, Sendable {
     case jpg
     case jpeg
 }
 
-public enum OpenClawCameraVideoFormat: String, Codable, Sendable {
+public enum OpenNexusCameraVideoFormat: String, Codable, Sendable {
     case mp4
 }
 
-public struct OpenClawCameraSnapParams: Codable, Sendable, Equatable {
-    public var facing: OpenClawCameraFacing?
+public struct OpenNexusCameraSnapParams: Codable, Sendable, Equatable {
+    public var facing: OpenNexusCameraFacing?
     public var maxWidth: Int?
     public var quality: Double?
-    public var format: OpenClawCameraImageFormat?
+    public var format: OpenNexusCameraImageFormat?
     public var deviceId: String?
     public var delayMs: Int?
 
     public init(
-        facing: OpenClawCameraFacing? = nil,
+        facing: OpenNexusCameraFacing? = nil,
         maxWidth: Int? = nil,
         quality: Double? = nil,
-        format: OpenClawCameraImageFormat? = nil,
+        format: OpenNexusCameraImageFormat? = nil,
         deviceId: String? = nil,
         delayMs: Int? = nil)
     {
@@ -45,18 +45,18 @@ public struct OpenClawCameraSnapParams: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawCameraClipParams: Codable, Sendable, Equatable {
-    public var facing: OpenClawCameraFacing?
+public struct OpenNexusCameraClipParams: Codable, Sendable, Equatable {
+    public var facing: OpenNexusCameraFacing?
     public var durationMs: Int?
     public var includeAudio: Bool?
-    public var format: OpenClawCameraVideoFormat?
+    public var format: OpenNexusCameraVideoFormat?
     public var deviceId: String?
 
     public init(
-        facing: OpenClawCameraFacing? = nil,
+        facing: OpenNexusCameraFacing? = nil,
         durationMs: Int? = nil,
         includeAudio: Bool? = nil,
-        format: OpenClawCameraVideoFormat? = nil,
+        format: OpenNexusCameraVideoFormat? = nil,
         deviceId: String? = nil)
     {
         self.facing = facing

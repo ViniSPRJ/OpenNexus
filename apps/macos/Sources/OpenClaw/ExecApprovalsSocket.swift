@@ -2,7 +2,7 @@ import AppKit
 import CryptoKit
 import Darwin
 import Foundation
-import OpenClawKit
+import OpenNexusKit
 import OSLog
 
 struct ExecApprovalPromptRequest: Codable, Sendable {
@@ -538,7 +538,7 @@ private enum ExecHostExecutor {
 }
 
 private final class ExecApprovalsSocketServer: @unchecked Sendable {
-    private let logger = Logger(subsystem: "ai.openclaw", category: "exec-approvals.socket")
+    private let logger = Logger(subsystem: "ai.opennexus", category: "exec-approvals.socket")
     private let socketPath: String
     private let token: String
     private let onPrompt: @Sendable (ExecApprovalPromptRequest) async -> ExecApprovalDecision

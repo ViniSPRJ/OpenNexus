@@ -2,7 +2,7 @@ import { EventEmitter } from "node:events";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { OpenNexusConfig } from "../config/config.js";
 import { createRestrictedAgentSandboxConfig } from "./test-helpers/sandbox-agent-config-fixtures.js";
 
 type SpawnCall = {
@@ -53,7 +53,7 @@ vi.mock("./skills.js", async (importOriginal) => {
 let resolveSandboxContext: typeof import("./sandbox.js").resolveSandboxContext;
 let resolveSandboxConfigForAgent: typeof import("./sandbox.js").resolveSandboxConfigForAgent;
 
-async function resolveContext(config: OpenClawConfig, sessionKey: string, workspaceDir: string) {
+async function resolveContext(config: OpenNexusConfig, sessionKey: string, workspaceDir: string) {
   return resolveSandboxContext({
     config,
     sessionKey,
@@ -75,7 +75,7 @@ function expectDockerSetupCommand(command: string) {
 
 function createDefaultsSandboxConfig(
   scope: "agent" | "shared" | "session" = "agent",
-): OpenClawConfig {
+): OpenNexusConfig {
   return {
     agents: {
       defaults: {
@@ -88,7 +88,7 @@ function createDefaultsSandboxConfig(
   };
 }
 
-function createWorkSetupCommandConfig(scope: "agent" | "shared"): OpenClawConfig {
+function createWorkSetupCommandConfig(scope: "agent" | "shared"): OpenNexusConfig {
   return {
     agents: {
       defaults: {
@@ -103,7 +103,7 @@ function createWorkSetupCommandConfig(scope: "agent" | "shared"): OpenClawConfig
       list: [
         {
           id: "work",
-          workspace: "~/openclaw-work",
+          workspace: "~/opennexus-work",
           sandbox: {
             mode: "all",
             scope,
@@ -127,19 +127,19 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should use agent-specific workspaceRoot", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: OpenNexusConfig = {
       agents: {
         defaults: {
           sandbox: {
             mode: "all",
             scope: "agent",
-            workspaceRoot: "~/.openclaw/sandboxes",
+            workspaceRoot: "~/.opennexus/sandboxes",
           },
         },
         list: [
           {
             id: "isolated",
-            workspace: "~/openclaw-isolated",
+            workspace: "~/opennexus-isolated",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -157,7 +157,7 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should prefer agent config over global for multiple agents", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: OpenNexusConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -168,14 +168,14 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "main",
-            workspace: "~/openclaw",
+            workspace: "~/opennexus",
             sandbox: {
               mode: "off",
             },
           },
           {
             id: "family",
-            workspace: "~/openclaw-family",
+            workspace: "~/opennexus-family",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -227,7 +227,7 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should use global sandbox config when no agent-specific config exists", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: OpenNexusConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -238,7 +238,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "main",
-            workspace: "~/openclaw",
+            workspace: "~/opennexus",
           },
         ],
       },
@@ -275,7 +275,7 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should allow agent-specific docker settings beyond setupCommand", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: OpenNexusConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -290,7 +290,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "work",
-            workspace: "~/openclaw-work",
+            workspace: "~/opennexus-work",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -325,14 +325,14 @@ describe("Agent-specific sandbox config", () => {
             list: [
               {
                 id: "main",
-                workspace: "~/openclaw",
+                workspace: "~/opennexus",
                 sandbox: {
                   mode: "off",
                 },
               },
             ],
           },
-        } satisfies OpenClawConfig,
+        } satisfies OpenNexusConfig,
         sessionKey: "agent:main:main",
         workspaceDir: "/tmp/test",
         assert: (context: Awaited<ReturnType<typeof resolveContext>>) => {
@@ -350,7 +350,7 @@ describe("Agent-specific sandbox config", () => {
             list: [
               {
                 id: "family",
-                workspace: "~/openclaw-family",
+                workspace: "~/opennexus-family",
                 sandbox: {
                   mode: "all",
                   scope: "agent",
@@ -358,7 +358,7 @@ describe("Agent-specific sandbox config", () => {
               },
             ],
           },
-        } satisfies OpenClawConfig,
+        } satisfies OpenNexusConfig,
         sessionKey: "agent:family:whatsapp:group:123",
         workspaceDir: "/tmp/test-family",
         assert: (context: Awaited<ReturnType<typeof resolveContext>>) => {
@@ -377,7 +377,7 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should use agent-specific scope", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: OpenNexusConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -388,7 +388,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "work",
-            workspace: "~/openclaw-work",
+            workspace: "~/opennexus-work",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -428,7 +428,7 @@ describe("Agent-specific sandbox config", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies OpenNexusConfig,
         expected: ["image"],
       },
     ]) {

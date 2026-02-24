@@ -1,7 +1,7 @@
-import OpenClawDiscovery
+import OpenNexusDiscovery
 import SwiftUI
 import Testing
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite(.serialized)
 @MainActor

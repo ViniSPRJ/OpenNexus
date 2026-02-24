@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawDiscovery
+import OpenNexusDiscovery
 import Testing
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite
 struct GatewayDiscoveryHelpersTests {
@@ -21,7 +21,7 @@ struct GatewayDiscoveryHelpersTests {
             tailnetDns: tailnetDns,
             sshPort: sshPort,
             gatewayPort: gatewayPort,
-            cliPath: "/tmp/openclaw",
+            cliPath: "/tmp/opennexus",
             stableID: UUID().uuidString,
             debugID: UUID().uuidString,
             isLocal: false)

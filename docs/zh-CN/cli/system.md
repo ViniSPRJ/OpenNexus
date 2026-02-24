@@ -3,7 +3,7 @@ read_when:
   - 你想在不创建 cron 作业的情况下入队系统事件
   - 你需要启用或禁用心跳
   - 你想检查系统在线状态条目
-summary: "`openclaw system` 的 CLI 参考（系统事件、心跳、在线状态）"
+summary: "`opennexus system` 的 CLI 参考（系统事件、心跳、在线状态）"
 title: system
 x-i18n:
   generated_at: "2026-02-03T07:45:23Z"
@@ -14,17 +14,17 @@ x-i18n:
   workflow: 15
 ---
 
-# `openclaw system`
+# `opennexus system`
 
 Gateway 网关的系统级辅助工具：入队系统事件、控制心跳和查看在线状态。
 
 ## 常用命令
 
 ```bash
-openclaw system event --text "Check for urgent follow-ups" --mode now
-openclaw system heartbeat enable
-openclaw system heartbeat last
-openclaw system presence
+opennexus system event --text "Check for urgent follow-ups" --mode now
+opennexus system heartbeat enable
+opennexus system heartbeat last
+opennexus system presence
 ```
 
 ## `system event`

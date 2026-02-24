@@ -1,35 +1,35 @@
-package ai.openclaw.android.protocol
+package ai.opennexus.android.protocol
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class OpenClawProtocolConstantsTest {
+class OpenNexusProtocolConstantsTest {
   @Test
   fun canvasCommandsUseStableStrings() {
-    assertEquals("canvas.present", OpenClawCanvasCommand.Present.rawValue)
-    assertEquals("canvas.hide", OpenClawCanvasCommand.Hide.rawValue)
-    assertEquals("canvas.navigate", OpenClawCanvasCommand.Navigate.rawValue)
-    assertEquals("canvas.eval", OpenClawCanvasCommand.Eval.rawValue)
-    assertEquals("canvas.snapshot", OpenClawCanvasCommand.Snapshot.rawValue)
+    assertEquals("canvas.present", OpenNexusCanvasCommand.Present.rawValue)
+    assertEquals("canvas.hide", OpenNexusCanvasCommand.Hide.rawValue)
+    assertEquals("canvas.navigate", OpenNexusCanvasCommand.Navigate.rawValue)
+    assertEquals("canvas.eval", OpenNexusCanvasCommand.Eval.rawValue)
+    assertEquals("canvas.snapshot", OpenNexusCanvasCommand.Snapshot.rawValue)
   }
 
   @Test
   fun a2uiCommandsUseStableStrings() {
-    assertEquals("canvas.a2ui.push", OpenClawCanvasA2UICommand.Push.rawValue)
-    assertEquals("canvas.a2ui.pushJSONL", OpenClawCanvasA2UICommand.PushJSONL.rawValue)
-    assertEquals("canvas.a2ui.reset", OpenClawCanvasA2UICommand.Reset.rawValue)
+    assertEquals("canvas.a2ui.push", OpenNexusCanvasA2UICommand.Push.rawValue)
+    assertEquals("canvas.a2ui.pushJSONL", OpenNexusCanvasA2UICommand.PushJSONL.rawValue)
+    assertEquals("canvas.a2ui.reset", OpenNexusCanvasA2UICommand.Reset.rawValue)
   }
 
   @Test
   fun capabilitiesUseStableStrings() {
-    assertEquals("canvas", OpenClawCapability.Canvas.rawValue)
-    assertEquals("camera", OpenClawCapability.Camera.rawValue)
-    assertEquals("screen", OpenClawCapability.Screen.rawValue)
-    assertEquals("voiceWake", OpenClawCapability.VoiceWake.rawValue)
+    assertEquals("canvas", OpenNexusCapability.Canvas.rawValue)
+    assertEquals("camera", OpenNexusCapability.Camera.rawValue)
+    assertEquals("screen", OpenNexusCapability.Screen.rawValue)
+    assertEquals("voiceWake", OpenNexusCapability.VoiceWake.rawValue)
   }
 
   @Test
   fun screenCommandsUseStableStrings() {
-    assertEquals("screen.record", OpenClawScreenCommand.Record.rawValue)
+    assertEquals("screen.record", OpenNexusScreenCommand.Record.rawValue)
   }
 }

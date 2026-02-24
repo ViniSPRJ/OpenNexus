@@ -1,5 +1,5 @@
 import Observation
-import OpenClawProtocol
+import OpenNexusProtocol
 import SwiftUI
 
 struct SkillsSettings: View {
@@ -225,15 +225,15 @@ private struct SkillRow: View {
 
     private var sourceLabel: String {
         switch self.skill.source {
-        case "openclaw-bundled":
+        case "opennexus-bundled":
             "Bundled"
-        case "openclaw-managed":
+        case "opennexus-managed":
             "Managed"
-        case "openclaw-workspace":
+        case "opennexus-workspace":
             "Workspace"
-        case "openclaw-extra":
+        case "opennexus-extra":
             "Extra"
-        case "openclaw-plugin":
+        case "opennexus-plugin":
             "Plugin"
         default:
             self.skill.source
@@ -573,7 +573,7 @@ extension SkillsSettings {
         let skill = SkillStatus(
             name: "Test Skill",
             description: "Test description",
-            source: "openclaw-bundled",
+            source: "opennexus-bundled",
             filePath: "/tmp/skills/test",
             baseDir: "/tmp/skills",
             skillKey: "test",

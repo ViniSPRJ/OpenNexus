@@ -1,8 +1,8 @@
-import OpenClawKit
+import OpenNexusKit
 import Foundation
 import os
 import Testing
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite struct GatewayChannelConnectTests {
     private enum FakeResponse {

@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$ROOT_DIR/docker-compose.yml"
 EXTRA_COMPOSE_FILE="$ROOT_DIR/docker-compose.extra.yml"
-IMAGE_NAME="${OPENCLAW_IMAGE:-openclaw:local}"
-EXTRA_MOUNTS="${OPENCLAW_EXTRA_MOUNTS:-}"
-HOME_VOLUME_NAME="${OPENCLAW_HOME_VOLUME:-}"
+IMAGE_NAME="${OPENNEXUS_IMAGE:-opennexus:local}"
+EXTRA_MOUNTS="${OPENNEXUS_EXTRA_MOUNTS:-}"
+HOME_VOLUME_NAME="${OPENNEXUS_HOME_VOLUME:-}"
 
 fail() {
   echo "ERROR: $*" >&2
@@ -42,14 +42,14 @@ validate_mount_path_value() {
 validate_named_volume() {
   local value="$1"
   if [[ ! "$value" =~ ^[A-Za-z0-9][A-Za-z0-9_.-]*$ ]]; then
-    fail "OPENCLAW_HOME_VOLUME must match [A-Za-z0-9][A-Za-z0-9_.-]* when using a named volume."
+    fail "OPENNEXUS_HOME_VOLUME must match [A-Za-z0-9][A-Za-z0-9_.-]* when using a named volume."
   fi
 }
 
 validate_mount_spec() {
   local mount="$1"
   if contains_disallowed_chars "$mount"; then
-    fail "OPENCLAW_EXTRA_MOUNTS entries cannot contain control characters."
+    fail "OPENNEXUS_EXTRA_MOUNTS entries cannot contain control characters."
   fi
   # Keep mount specs strict to avoid YAML structure injection.
   # Expected format: source:target[:options]
@@ -64,50 +64,50 @@ if ! docker compose version >/dev/null 2>&1; then
   exit 1
 fi
 
-OPENCLAW_CONFIG_DIR="${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw}"
-OPENCLAW_WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace}"
+OPENNEXUS_CONFIG_DIR="${OPENNEXUS_CONFIG_DIR:-$HOME/.opennexus}"
+OPENNEXUS_WORKSPACE_DIR="${OPENNEXUS_WORKSPACE_DIR:-$HOME/.opennexus/workspace}"
 
-validate_mount_path_value "OPENCLAW_CONFIG_DIR" "$OPENCLAW_CONFIG_DIR"
-validate_mount_path_value "OPENCLAW_WORKSPACE_DIR" "$OPENCLAW_WORKSPACE_DIR"
+validate_mount_path_value "OPENNEXUS_CONFIG_DIR" "$OPENNEXUS_CONFIG_DIR"
+validate_mount_path_value "OPENNEXUS_WORKSPACE_DIR" "$OPENNEXUS_WORKSPACE_DIR"
 if [[ -n "$HOME_VOLUME_NAME" ]]; then
   if [[ "$HOME_VOLUME_NAME" == *"/"* ]]; then
-    validate_mount_path_value "OPENCLAW_HOME_VOLUME" "$HOME_VOLUME_NAME"
+    validate_mount_path_value "OPENNEXUS_HOME_VOLUME" "$HOME_VOLUME_NAME"
   else
     validate_named_volume "$HOME_VOLUME_NAME"
   fi
 fi
 if contains_disallowed_chars "$EXTRA_MOUNTS"; then
-  fail "OPENCLAW_EXTRA_MOUNTS cannot contain control characters."
+  fail "OPENNEXUS_EXTRA_MOUNTS cannot contain control characters."
 fi
 
-mkdir -p "$OPENCLAW_CONFIG_DIR"
-mkdir -p "$OPENCLAW_WORKSPACE_DIR"
+mkdir -p "$OPENNEXUS_CONFIG_DIR"
+mkdir -p "$OPENNEXUS_WORKSPACE_DIR"
 # Seed device-identity parent eagerly for Docker Desktop/Windows bind mounts
 # that reject creating new subdirectories from inside the container.
-mkdir -p "$OPENCLAW_CONFIG_DIR/identity"
+mkdir -p "$OPENNEXUS_CONFIG_DIR/identity"
 
-export OPENCLAW_CONFIG_DIR
-export OPENCLAW_WORKSPACE_DIR
-export OPENCLAW_GATEWAY_PORT="${OPENCLAW_GATEWAY_PORT:-18789}"
-export OPENCLAW_BRIDGE_PORT="${OPENCLAW_BRIDGE_PORT:-18790}"
-export OPENCLAW_GATEWAY_BIND="${OPENCLAW_GATEWAY_BIND:-lan}"
-export OPENCLAW_IMAGE="$IMAGE_NAME"
-export OPENCLAW_DOCKER_APT_PACKAGES="${OPENCLAW_DOCKER_APT_PACKAGES:-}"
-export OPENCLAW_EXTRA_MOUNTS="$EXTRA_MOUNTS"
-export OPENCLAW_HOME_VOLUME="$HOME_VOLUME_NAME"
+export OPENNEXUS_CONFIG_DIR
+export OPENNEXUS_WORKSPACE_DIR
+export OPENNEXUS_GATEWAY_PORT="${OPENNEXUS_GATEWAY_PORT:-18789}"
+export OPENNEXUS_BRIDGE_PORT="${OPENNEXUS_BRIDGE_PORT:-18790}"
+export OPENNEXUS_GATEWAY_BIND="${OPENNEXUS_GATEWAY_BIND:-lan}"
+export OPENNEXUS_IMAGE="$IMAGE_NAME"
+export OPENNEXUS_DOCKER_APT_PACKAGES="${OPENNEXUS_DOCKER_APT_PACKAGES:-}"
+export OPENNEXUS_EXTRA_MOUNTS="$EXTRA_MOUNTS"
+export OPENNEXUS_HOME_VOLUME="$HOME_VOLUME_NAME"
 
-if [[ -z "${OPENCLAW_GATEWAY_TOKEN:-}" ]]; then
+if [[ -z "${OPENNEXUS_GATEWAY_TOKEN:-}" ]]; then
   if command -v openssl >/dev/null 2>&1; then
-    OPENCLAW_GATEWAY_TOKEN="$(openssl rand -hex 32)"
+    OPENNEXUS_GATEWAY_TOKEN="$(openssl rand -hex 32)"
   else
-    OPENCLAW_GATEWAY_TOKEN="$(python3 - <<'PY'
+    OPENNEXUS_GATEWAY_TOKEN="$(python3 - <<'PY'
 import secrets
 print(secrets.token_hex(32))
 PY
 )"
   fi
 fi
-export OPENCLAW_GATEWAY_TOKEN
+export OPENNEXUS_GATEWAY_TOKEN
 
 COMPOSE_FILES=("$COMPOSE_FILE")
 COMPOSE_ARGS=()
@@ -122,14 +122,14 @@ write_extra_compose() {
 
   cat >"$EXTRA_COMPOSE_FILE" <<'YAML'
 services:
-  openclaw-gateway:
+  opennexus-gateway:
     volumes:
 YAML
 
   if [[ -n "$home_volume" ]]; then
     gateway_home_mount="${home_volume}:/home/node"
-    gateway_config_mount="${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw"
-    gateway_workspace_mount="${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace"
+    gateway_config_mount="${OPENNEXUS_CONFIG_DIR}:/home/node/.opennexus"
+    gateway_workspace_mount="${OPENNEXUS_WORKSPACE_DIR}:/home/node/.opennexus/workspace"
     validate_mount_spec "$gateway_home_mount"
     validate_mount_spec "$gateway_config_mount"
     validate_mount_spec "$gateway_workspace_mount"
@@ -144,7 +144,7 @@ YAML
   done
 
   cat >>"$EXTRA_COMPOSE_FILE" <<'YAML'
-  openclaw-cli:
+  opennexus-cli:
     volumes:
 YAML
 
@@ -236,20 +236,20 @@ upsert_env() {
 }
 
 upsert_env "$ENV_FILE" \
-  OPENCLAW_CONFIG_DIR \
-  OPENCLAW_WORKSPACE_DIR \
-  OPENCLAW_GATEWAY_PORT \
-  OPENCLAW_BRIDGE_PORT \
-  OPENCLAW_GATEWAY_BIND \
-  OPENCLAW_GATEWAY_TOKEN \
-  OPENCLAW_IMAGE \
-  OPENCLAW_EXTRA_MOUNTS \
-  OPENCLAW_HOME_VOLUME \
-  OPENCLAW_DOCKER_APT_PACKAGES
+  OPENNEXUS_CONFIG_DIR \
+  OPENNEXUS_WORKSPACE_DIR \
+  OPENNEXUS_GATEWAY_PORT \
+  OPENNEXUS_BRIDGE_PORT \
+  OPENNEXUS_GATEWAY_BIND \
+  OPENNEXUS_GATEWAY_TOKEN \
+  OPENNEXUS_IMAGE \
+  OPENNEXUS_EXTRA_MOUNTS \
+  OPENNEXUS_HOME_VOLUME \
+  OPENNEXUS_DOCKER_APT_PACKAGES
 
 echo "==> Building Docker image: $IMAGE_NAME"
 docker build \
-  --build-arg "OPENCLAW_DOCKER_APT_PACKAGES=${OPENCLAW_DOCKER_APT_PACKAGES}" \
+  --build-arg "OPENNEXUS_DOCKER_APT_PACKAGES=${OPENNEXUS_DOCKER_APT_PACKAGES}" \
   -t "$IMAGE_NAME" \
   -f "$ROOT_DIR/Dockerfile" \
   "$ROOT_DIR"
@@ -259,33 +259,33 @@ echo "==> Onboarding (interactive)"
 echo "When prompted:"
 echo "  - Gateway bind: lan"
 echo "  - Gateway auth: token"
-echo "  - Gateway token: $OPENCLAW_GATEWAY_TOKEN"
+echo "  - Gateway token: $OPENNEXUS_GATEWAY_TOKEN"
 echo "  - Tailscale exposure: Off"
 echo "  - Install Gateway daemon: No"
 echo ""
-docker compose "${COMPOSE_ARGS[@]}" run --rm openclaw-cli onboard --no-install-daemon
+docker compose "${COMPOSE_ARGS[@]}" run --rm opennexus-cli onboard --no-install-daemon
 
 echo ""
 echo "==> Provider setup (optional)"
 echo "WhatsApp (QR):"
-echo "  ${COMPOSE_HINT} run --rm openclaw-cli channels login"
+echo "  ${COMPOSE_HINT} run --rm opennexus-cli channels login"
 echo "Telegram (bot token):"
-echo "  ${COMPOSE_HINT} run --rm openclaw-cli channels add --channel telegram --token <token>"
+echo "  ${COMPOSE_HINT} run --rm opennexus-cli channels add --channel telegram --token <token>"
 echo "Discord (bot token):"
-echo "  ${COMPOSE_HINT} run --rm openclaw-cli channels add --channel discord --token <token>"
-echo "Docs: https://docs.openclaw.ai/channels"
+echo "  ${COMPOSE_HINT} run --rm opennexus-cli channels add --channel discord --token <token>"
+echo "Docs: https://docs.opennexus.ai/channels"
 
 echo ""
 echo "==> Starting gateway"
-docker compose "${COMPOSE_ARGS[@]}" up -d openclaw-gateway
+docker compose "${COMPOSE_ARGS[@]}" up -d opennexus-gateway
 
 echo ""
 echo "Gateway running with host port mapping."
 echo "Access from tailnet devices via the host's tailnet IP."
-echo "Config: $OPENCLAW_CONFIG_DIR"
-echo "Workspace: $OPENCLAW_WORKSPACE_DIR"
-echo "Token: $OPENCLAW_GATEWAY_TOKEN"
+echo "Config: $OPENNEXUS_CONFIG_DIR"
+echo "Workspace: $OPENNEXUS_WORKSPACE_DIR"
+echo "Token: $OPENNEXUS_GATEWAY_TOKEN"
 echo ""
 echo "Commands:"
-echo "  ${COMPOSE_HINT} logs -f openclaw-gateway"
-echo "  ${COMPOSE_HINT} exec openclaw-gateway node dist/index.js health --token \"$OPENCLAW_GATEWAY_TOKEN\""
+echo "  ${COMPOSE_HINT} logs -f opennexus-gateway"
+echo "  ${COMPOSE_HINT} exec opennexus-gateway node dist/index.js health --token \"$OPENNEXUS_GATEWAY_TOKEN\""

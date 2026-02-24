@@ -1,6 +1,6 @@
 import AppKit
 import Testing
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite(.serialized) struct VoicePushToTalkHotkeyTests {
     actor Counter {

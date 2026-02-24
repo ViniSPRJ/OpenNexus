@@ -1,7 +1,7 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk";
+import type { OpenNexusConfig } from "opennexus/plugin-sdk";
 import { expect, vi } from "vitest";
 
-export function createMattermostTestConfig(): OpenClawConfig {
+export function createMattermostTestConfig(): OpenNexusConfig {
   return {
     channels: {
       mattermost: {

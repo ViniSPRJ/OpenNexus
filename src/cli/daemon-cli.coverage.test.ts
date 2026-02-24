@@ -97,15 +97,15 @@ describe("daemon-cli coverage", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_GATEWAY_PORT",
-      "OPENCLAW_PROFILE",
+      "OPENNEXUS_STATE_DIR",
+      "OPENNEXUS_CONFIG_PATH",
+      "OPENNEXUS_GATEWAY_PORT",
+      "OPENNEXUS_PROFILE",
     ]);
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-cli-state";
-    process.env.OPENCLAW_CONFIG_PATH = "/tmp/openclaw-cli-state/openclaw.json";
-    delete process.env.OPENCLAW_GATEWAY_PORT;
-    delete process.env.OPENCLAW_PROFILE;
+    process.env.OPENNEXUS_STATE_DIR = "/tmp/opennexus-cli-state";
+    process.env.OPENNEXUS_CONFIG_PATH = "/tmp/opennexus-cli-state/opennexus.json";
+    delete process.env.OPENNEXUS_GATEWAY_PORT;
+    delete process.env.OPENNEXUS_PROFILE;
     serviceReadCommand.mockResolvedValue(null);
   });
 
@@ -133,10 +133,10 @@ describe("daemon-cli coverage", () => {
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
-        OPENCLAW_PROFILE: "dev",
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon-state",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon-state/openclaw.json",
-        OPENCLAW_GATEWAY_PORT: "19001",
+        OPENNEXUS_PROFILE: "dev",
+        OPENNEXUS_STATE_DIR: "/tmp/opennexus-daemon-state",
+        OPENNEXUS_CONFIG_PATH: "/tmp/opennexus-daemon-state/opennexus.json",
+        OPENNEXUS_GATEWAY_PORT: "19001",
       },
       sourcePath: "/tmp/bot.molt.gateway.plist",
     });

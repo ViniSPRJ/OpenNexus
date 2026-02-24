@@ -1,6 +1,6 @@
-import OpenClawKit
+import OpenNexusKit
 import Testing
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite struct IOSGatewayChatTransportTests {
     @Test func requestsFailFastWhenGatewayNotConnected() async {

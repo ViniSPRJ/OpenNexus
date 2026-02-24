@@ -1,11 +1,11 @@
 import Foundation
 
-public enum OpenClawCalendarCommand: String, Codable, Sendable {
+public enum OpenNexusCalendarCommand: String, Codable, Sendable {
     case events = "calendar.events"
     case add = "calendar.add"
 }
 
-public struct OpenClawCalendarEventsParams: Codable, Sendable, Equatable {
+public struct OpenNexusCalendarEventsParams: Codable, Sendable, Equatable {
     public var startISO: String?
     public var endISO: String?
     public var limit: Int?
@@ -17,7 +17,7 @@ public struct OpenClawCalendarEventsParams: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawCalendarAddParams: Codable, Sendable, Equatable {
+public struct OpenNexusCalendarAddParams: Codable, Sendable, Equatable {
     public var title: String
     public var startISO: String
     public var endISO: String
@@ -48,7 +48,7 @@ public struct OpenClawCalendarAddParams: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawCalendarEventPayload: Codable, Sendable, Equatable {
+public struct OpenNexusCalendarEventPayload: Codable, Sendable, Equatable {
     public var identifier: String
     public var title: String
     public var startISO: String
@@ -76,18 +76,18 @@ public struct OpenClawCalendarEventPayload: Codable, Sendable, Equatable {
     }
 }
 
-public struct OpenClawCalendarEventsPayload: Codable, Sendable, Equatable {
-    public var events: [OpenClawCalendarEventPayload]
+public struct OpenNexusCalendarEventsPayload: Codable, Sendable, Equatable {
+    public var events: [OpenNexusCalendarEventPayload]
 
-    public init(events: [OpenClawCalendarEventPayload]) {
+    public init(events: [OpenNexusCalendarEventPayload]) {
         self.events = events
     }
 }
 
-public struct OpenClawCalendarAddPayload: Codable, Sendable, Equatable {
-    public var event: OpenClawCalendarEventPayload
+public struct OpenNexusCalendarAddPayload: Codable, Sendable, Equatable {
+    public var event: OpenNexusCalendarEventPayload
 
-    public init(event: OpenClawCalendarEventPayload) {
+    public init(event: OpenNexusCalendarEventPayload) {
         self.event = event
     }
 }

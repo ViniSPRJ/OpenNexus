@@ -1,4 +1,4 @@
-package ai.openclaw.android.ui
+package ai.opennexus.android.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

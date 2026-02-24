@@ -1,13 +1,13 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { OpenNexusConfig } from "../config/config.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../routing/session-key.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 
 export type PromptAccountIdParams = {
-  cfg: OpenClawConfig;
+  cfg: OpenNexusConfig;
   prompter: WizardPrompter;
   label: string;
   currentId?: string;
-  listAccountIds: (cfg: OpenClawConfig) => string[];
+  listAccountIds: (cfg: OpenNexusConfig) => string[];
   defaultAccountId: string;
 };
 

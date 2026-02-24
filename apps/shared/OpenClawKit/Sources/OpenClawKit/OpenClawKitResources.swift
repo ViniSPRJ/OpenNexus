@@ -1,7 +1,7 @@
 import Foundation
 
-public enum OpenClawKitResources {
-    /// Resource bundle for OpenClawKit.
+public enum OpenNexusKitResources {
+    /// Resource bundle for OpenNexusKit.
     ///
     /// Locates the SwiftPM-generated resource bundle, checking multiple locations:
     /// 1. Inside Bundle.main (packaged apps)
@@ -13,7 +13,7 @@ public enum OpenClawKitResources {
     /// SwiftPM's expectations.
     public static let bundle: Bundle = locateBundle()
 
-    private static let bundleName = "OpenClawKit_OpenClawKit"
+    private static let bundleName = "OpenNexusKit_OpenNexusKit"
 
     private static func locateBundle() -> Bundle {
         // 1. Check inside Bundle.main (packaged apps copy resources here)

@@ -1,4 +1,4 @@
-import OpenClawProtocol
+import OpenNexusProtocol
 
 /// Server-push messages from the gateway websocket.
 ///

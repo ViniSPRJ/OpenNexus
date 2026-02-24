@@ -1,4 +1,4 @@
-package ai.openclaw.android.voice
+package ai.opennexus.android.voice
 
 import android.Manifest
 import android.content.Context
@@ -20,9 +20,9 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.core.content.ContextCompat
-import ai.openclaw.android.gateway.GatewaySession
-import ai.openclaw.android.isCanonicalMainSessionKey
-import ai.openclaw.android.normalizeMainKey
+import ai.opennexus.android.gateway.GatewaySession
+import ai.opennexus.android.isCanonicalMainSessionKey
+import ai.opennexus.android.normalizeMainKey
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID

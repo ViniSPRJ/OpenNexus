@@ -5,12 +5,12 @@ import {
   getSessionsSpawnTool,
   resetSessionsSpawnConfigOverride,
   setSessionsSpawnConfigOverride,
-} from "./openclaw-tools.subagents.sessions-spawn.test-harness.js";
+} from "./opennexus-tools.subagents.sessions-spawn.test-harness.js";
 import { resetSubagentRegistryForTests } from "./subagent-registry.js";
 
 const callGatewayMock = getCallGatewayMock();
 
-describe("openclaw-tools: subagents (sessions_spawn allowlist)", () => {
+describe("opennexus-tools: subagents (sessions_spawn allowlist)", () => {
   function setAllowAgents(allowAgents: string[]) {
     setSessionsSpawnConfigOverride({
       session: {

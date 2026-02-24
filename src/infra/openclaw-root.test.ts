@@ -4,8 +4,8 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 type FakeFsEntry = { kind: "file"; content: string } | { kind: "dir" };
 
-const VITEST_FS_BASE = path.join(path.parse(process.cwd()).root, "__openclaw_vitest__");
-const FIXTURE_BASE = path.join(VITEST_FS_BASE, "openclaw-root");
+const VITEST_FS_BASE = path.join(path.parse(process.cwd()).root, "__opennexus_vitest__");
+const FIXTURE_BASE = path.join(VITEST_FS_BASE, "opennexus-root");
 
 const state = vi.hoisted(() => ({
   entries: new Map<string, FakeFsEntry>(),
@@ -89,13 +89,13 @@ vi.mock("node:fs/promises", async (importOriginal) => {
   return { ...wrapped, default: wrapped };
 });
 
-describe("resolveOpenClawPackageRoot", () => {
-  let resolveOpenClawPackageRoot: typeof import("./openclaw-root.js").resolveOpenClawPackageRoot;
-  let resolveOpenClawPackageRootSync: typeof import("./openclaw-root.js").resolveOpenClawPackageRootSync;
+describe("resolveOpenNexusPackageRoot", () => {
+  let resolveOpenNexusPackageRoot: typeof import("./opennexus-root.js").resolveOpenNexusPackageRoot;
+  let resolveOpenNexusPackageRootSync: typeof import("./opennexus-root.js").resolveOpenNexusPackageRootSync;
 
   beforeAll(async () => {
-    ({ resolveOpenClawPackageRoot, resolveOpenClawPackageRootSync } =
-      await import("./openclaw-root.js"));
+    ({ resolveOpenNexusPackageRoot, resolveOpenNexusPackageRootSync } =
+      await import("./opennexus-root.js"));
   });
 
   beforeEach(() => {
@@ -106,56 +106,56 @@ describe("resolveOpenClawPackageRoot", () => {
 
   it("resolves package root from .bin argv1", async () => {
     const project = fx("bin-scenario");
-    const argv1 = path.join(project, "node_modules", ".bin", "openclaw");
-    const pkgRoot = path.join(project, "node_modules", "openclaw");
-    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "openclaw" }));
+    const argv1 = path.join(project, "node_modules", ".bin", "opennexus");
+    const pkgRoot = path.join(project, "node_modules", "opennexus");
+    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "opennexus" }));
 
-    expect(resolveOpenClawPackageRootSync({ argv1 })).toBe(pkgRoot);
+    expect(resolveOpenNexusPackageRootSync({ argv1 })).toBe(pkgRoot);
   });
 
   it("resolves package root via symlinked argv1", async () => {
     const project = fx("symlink-scenario");
-    const bin = path.join(project, "bin", "openclaw");
+    const bin = path.join(project, "bin", "opennexus");
     const realPkg = path.join(project, "real-pkg");
-    state.realpaths.set(abs(bin), abs(path.join(realPkg, "openclaw.mjs")));
-    setFile(path.join(realPkg, "package.json"), JSON.stringify({ name: "openclaw" }));
+    state.realpaths.set(abs(bin), abs(path.join(realPkg, "opennexus.mjs")));
+    setFile(path.join(realPkg, "package.json"), JSON.stringify({ name: "opennexus" }));
 
-    expect(resolveOpenClawPackageRootSync({ argv1: bin })).toBe(realPkg);
+    expect(resolveOpenNexusPackageRootSync({ argv1: bin })).toBe(realPkg);
   });
 
   it("falls back when argv1 realpath throws", async () => {
     const project = fx("realpath-throw-scenario");
-    const argv1 = path.join(project, "node_modules", ".bin", "openclaw");
-    const pkgRoot = path.join(project, "node_modules", "openclaw");
+    const argv1 = path.join(project, "node_modules", ".bin", "opennexus");
+    const pkgRoot = path.join(project, "node_modules", "opennexus");
     state.realpathErrors.add(abs(argv1));
-    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "openclaw" }));
+    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "opennexus" }));
 
-    expect(resolveOpenClawPackageRootSync({ argv1 })).toBe(pkgRoot);
+    expect(resolveOpenNexusPackageRootSync({ argv1 })).toBe(pkgRoot);
   });
 
   it("prefers moduleUrl candidates", async () => {
     const pkgRoot = fx("moduleurl");
-    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "openclaw" }));
+    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "opennexus" }));
     const moduleUrl = pathToFileURL(path.join(pkgRoot, "dist", "index.js")).toString();
 
-    expect(resolveOpenClawPackageRootSync({ moduleUrl })).toBe(pkgRoot);
+    expect(resolveOpenNexusPackageRootSync({ moduleUrl })).toBe(pkgRoot);
   });
 
-  it("returns null for non-openclaw package roots", async () => {
-    const pkgRoot = fx("not-openclaw");
-    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "not-openclaw" }));
+  it("returns null for non-opennexus package roots", async () => {
+    const pkgRoot = fx("not-opennexus");
+    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "not-opennexus" }));
 
-    expect(resolveOpenClawPackageRootSync({ cwd: pkgRoot })).toBeNull();
+    expect(resolveOpenNexusPackageRootSync({ cwd: pkgRoot })).toBeNull();
   });
 
   it("async resolver matches sync behavior", async () => {
     const pkgRoot = fx("async");
-    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "openclaw" }));
+    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "opennexus" }));
 
-    await expect(resolveOpenClawPackageRoot({ cwd: pkgRoot })).resolves.toBe(pkgRoot);
+    await expect(resolveOpenNexusPackageRoot({ cwd: pkgRoot })).resolves.toBe(pkgRoot);
   });
 
   it("async resolver returns null when no package roots exist", async () => {
-    await expect(resolveOpenClawPackageRoot({ cwd: fx("missing") })).resolves.toBeNull();
+    await expect(resolveOpenNexusPackageRoot({ cwd: fx("missing") })).resolves.toBeNull();
   });
 });

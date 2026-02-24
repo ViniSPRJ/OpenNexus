@@ -1,6 +1,6 @@
 import Testing
 
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite struct CameraCaptureServiceTests {
     @Test func normalizeSnapDefaults() {

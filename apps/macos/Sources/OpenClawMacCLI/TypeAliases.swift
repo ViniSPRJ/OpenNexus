@@ -1,5 +1,5 @@
-import OpenClawKit
-import OpenClawProtocol
+import OpenNexusKit
+import OpenNexusProtocol
 
-typealias ProtoAnyCodable = OpenClawProtocol.AnyCodable
-typealias KitAnyCodable = OpenClawKit.AnyCodable
+typealias ProtoAnyCodable = OpenNexusProtocol.AnyCodable
+typealias KitAnyCodable = OpenNexusKit.AnyCodable

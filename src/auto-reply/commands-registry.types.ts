@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.js";
+import type { OpenNexusConfig } from "../config/types.js";
 
 export type CommandScope = "text" | "native" | "both";
 
@@ -14,7 +14,7 @@ export type CommandCategory =
 export type CommandArgType = "string" | "number" | "boolean";
 
 export type CommandArgChoiceContext = {
-  cfg?: OpenClawConfig;
+  cfg?: OpenNexusConfig;
   provider?: string;
   model?: string;
   command: ChatCommandDefinition;
@@ -80,7 +80,7 @@ export type CommandDetection = {
 };
 
 export type ShouldHandleTextCommandsParams = {
-  cfg: OpenClawConfig;
+  cfg: OpenNexusConfig;
   surface: string;
   commandSource?: "text" | "native";
 };

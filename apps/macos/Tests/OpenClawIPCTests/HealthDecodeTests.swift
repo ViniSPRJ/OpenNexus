@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import OpenNexus
 
 @Suite struct HealthDecodeTests {
     private let sampleJSON: String = // minimal but complete payload

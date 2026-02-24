@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
-import OpenClawDiscovery
-import OpenClawIPC
+import OpenNexusDiscovery
+import OpenNexusIPC
 import SwiftUI
 
 extension OnboardingView {
@@ -31,11 +31,11 @@ extension OnboardingView {
             self.state.remoteTarget = GatewayDiscoveryHelpers.sshTarget(for: gateway) ?? ""
         }
         if let endpoint = GatewayDiscoveryHelpers.serviceEndpoint(for: gateway) {
-            OpenClawConfigFile.setRemoteGatewayUrl(
+            OpenNexusConfigFile.setRemoteGatewayUrl(
                 host: endpoint.host,
                 port: endpoint.port)
         } else {
-            OpenClawConfigFile.clearRemoteGatewayUrl()
+            OpenNexusConfigFile.clearRemoteGatewayUrl()
         }
 
         self.state.connectionMode = .remote
@@ -46,7 +46,7 @@ extension OnboardingView {
         SettingsTabRouter.request(tab)
         self.openSettings()
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .openclawSelectSettingsTab, object: tab)
+            NotificationCenter.default.post(name: .opennexusSelectSettingsTab, object: tab)
         }
     }
 
@@ -66,7 +66,7 @@ extension OnboardingView {
     }
 
     func finish() {
-        UserDefaults.standard.set(true, forKey: "openclaw.onboardingSeen")
+        UserDefaults.standard.set(true, forKey: "opennexus.onboardingSeen")
         UserDefaults.standard.set(currentOnboardingVersion, forKey: onboardingVersionKey)
         OnboardingController.shared.close()
     }
@@ -112,9 +112,9 @@ extension OnboardingView {
                 code: parsed.code,
                 state: parsed.state,
                 verifier: pkce.verifier)
-            try OpenClawOAuthStore.saveAnthropicOAuth(creds)
+            try OpenNexusOAuthStore.saveAnthropicOAuth(creds)
             self.refreshAnthropicOAuthStatus()
-            self.anthropicAuthStatus = "Connected. OpenClaw can now use Claude."
+            self.anthropicAuthStatus = "Connected. OpenNexus can now use Claude."
         } catch {
             self.anthropicAuthStatus = "OAuth failed: \(error.localizedDescription)"
         }

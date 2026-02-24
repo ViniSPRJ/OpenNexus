@@ -6,7 +6,7 @@ import CryptoKit
 import EventKit
 import Foundation
 import Darwin
-import OpenClawKit
+import OpenNexusKit
 import Network
 import Observation
 import Photos
@@ -753,7 +753,7 @@ final class GatewayConnectionController {
         if manualClientId?.isEmpty == false {
             return manualClientId!
         }
-        return "openclaw-ios"
+        return "opennexus-ios"
     }
 
     private func resolveManualPort(host: String, port: Int, useTLS: Bool) -> Int? {
@@ -783,32 +783,32 @@ final class GatewayConnectionController {
     }
 
     private func currentCaps() -> [String] {
-        var caps = [OpenClawCapability.canvas.rawValue, OpenClawCapability.screen.rawValue]
+        var caps = [OpenNexusCapability.canvas.rawValue, OpenNexusCapability.screen.rawValue]
 
         // Default-on: if the key doesn't exist yet, treat it as enabled.
         let cameraEnabled =
             UserDefaults.standard.object(forKey: "camera.enabled") == nil
                 ? true
                 : UserDefaults.standard.bool(forKey: "camera.enabled")
-        if cameraEnabled { caps.append(OpenClawCapability.camera.rawValue) }
+        if cameraEnabled { caps.append(OpenNexusCapability.camera.rawValue) }
 
         let voiceWakeEnabled = UserDefaults.standard.bool(forKey: VoiceWakePreferences.enabledKey)
-        if voiceWakeEnabled { caps.append(OpenClawCapability.voiceWake.rawValue) }
+        if voiceWakeEnabled { caps.append(OpenNexusCapability.voiceWake.rawValue) }
 
         let locationModeRaw = UserDefaults.standard.string(forKey: "location.enabledMode") ?? "off"
-        let locationMode = OpenClawLocationMode(rawValue: locationModeRaw) ?? .off
-        if locationMode != .off { caps.append(OpenClawCapability.location.rawValue) }
+        let locationMode = OpenNexusLocationMode(rawValue: locationModeRaw) ?? .off
+        if locationMode != .off { caps.append(OpenNexusCapability.location.rawValue) }
 
-        caps.append(OpenClawCapability.device.rawValue)
+        caps.append(OpenNexusCapability.device.rawValue)
         if WatchMessagingService.isSupportedOnDevice() {
-            caps.append(OpenClawCapability.watch.rawValue)
+            caps.append(OpenNexusCapability.watch.rawValue)
         }
-        caps.append(OpenClawCapability.photos.rawValue)
-        caps.append(OpenClawCapability.contacts.rawValue)
-        caps.append(OpenClawCapability.calendar.rawValue)
-        caps.append(OpenClawCapability.reminders.rawValue)
+        caps.append(OpenNexusCapability.photos.rawValue)
+        caps.append(OpenNexusCapability.contacts.rawValue)
+        caps.append(OpenNexusCapability.calendar.rawValue)
+        caps.append(OpenNexusCapability.reminders.rawValue)
         if Self.motionAvailable() {
-            caps.append(OpenClawCapability.motion.rawValue)
+            caps.append(OpenNexusCapability.motion.rawValue)
         }
 
         return caps
@@ -816,58 +816,58 @@ final class GatewayConnectionController {
 
     private func currentCommands() -> [String] {
         var commands: [String] = [
-            OpenClawCanvasCommand.present.rawValue,
-            OpenClawCanvasCommand.hide.rawValue,
-            OpenClawCanvasCommand.navigate.rawValue,
-            OpenClawCanvasCommand.evalJS.rawValue,
-            OpenClawCanvasCommand.snapshot.rawValue,
-            OpenClawCanvasA2UICommand.push.rawValue,
-            OpenClawCanvasA2UICommand.pushJSONL.rawValue,
-            OpenClawCanvasA2UICommand.reset.rawValue,
-            OpenClawScreenCommand.record.rawValue,
-            OpenClawSystemCommand.notify.rawValue,
-            OpenClawChatCommand.push.rawValue,
-            OpenClawTalkCommand.pttStart.rawValue,
-            OpenClawTalkCommand.pttStop.rawValue,
-            OpenClawTalkCommand.pttCancel.rawValue,
-            OpenClawTalkCommand.pttOnce.rawValue,
+            OpenNexusCanvasCommand.present.rawValue,
+            OpenNexusCanvasCommand.hide.rawValue,
+            OpenNexusCanvasCommand.navigate.rawValue,
+            OpenNexusCanvasCommand.evalJS.rawValue,
+            OpenNexusCanvasCommand.snapshot.rawValue,
+            OpenNexusCanvasA2UICommand.push.rawValue,
+            OpenNexusCanvasA2UICommand.pushJSONL.rawValue,
+            OpenNexusCanvasA2UICommand.reset.rawValue,
+            OpenNexusScreenCommand.record.rawValue,
+            OpenNexusSystemCommand.notify.rawValue,
+            OpenNexusChatCommand.push.rawValue,
+            OpenNexusTalkCommand.pttStart.rawValue,
+            OpenNexusTalkCommand.pttStop.rawValue,
+            OpenNexusTalkCommand.pttCancel.rawValue,
+            OpenNexusTalkCommand.pttOnce.rawValue,
         ]
 
         let caps = Set(self.currentCaps())
-        if caps.contains(OpenClawCapability.camera.rawValue) {
-            commands.append(OpenClawCameraCommand.list.rawValue)
-            commands.append(OpenClawCameraCommand.snap.rawValue)
-            commands.append(OpenClawCameraCommand.clip.rawValue)
+        if caps.contains(OpenNexusCapability.camera.rawValue) {
+            commands.append(OpenNexusCameraCommand.list.rawValue)
+            commands.append(OpenNexusCameraCommand.snap.rawValue)
+            commands.append(OpenNexusCameraCommand.clip.rawValue)
         }
-        if caps.contains(OpenClawCapability.location.rawValue) {
-            commands.append(OpenClawLocationCommand.get.rawValue)
+        if caps.contains(OpenNexusCapability.location.rawValue) {
+            commands.append(OpenNexusLocationCommand.get.rawValue)
         }
-        if caps.contains(OpenClawCapability.device.rawValue) {
-            commands.append(OpenClawDeviceCommand.status.rawValue)
-            commands.append(OpenClawDeviceCommand.info.rawValue)
+        if caps.contains(OpenNexusCapability.device.rawValue) {
+            commands.append(OpenNexusDeviceCommand.status.rawValue)
+            commands.append(OpenNexusDeviceCommand.info.rawValue)
         }
-        if caps.contains(OpenClawCapability.watch.rawValue) {
-            commands.append(OpenClawWatchCommand.status.rawValue)
-            commands.append(OpenClawWatchCommand.notify.rawValue)
+        if caps.contains(OpenNexusCapability.watch.rawValue) {
+            commands.append(OpenNexusWatchCommand.status.rawValue)
+            commands.append(OpenNexusWatchCommand.notify.rawValue)
         }
-        if caps.contains(OpenClawCapability.photos.rawValue) {
-            commands.append(OpenClawPhotosCommand.latest.rawValue)
+        if caps.contains(OpenNexusCapability.photos.rawValue) {
+            commands.append(OpenNexusPhotosCommand.latest.rawValue)
         }
-        if caps.contains(OpenClawCapability.contacts.rawValue) {
-            commands.append(OpenClawContactsCommand.search.rawValue)
-            commands.append(OpenClawContactsCommand.add.rawValue)
+        if caps.contains(OpenNexusCapability.contacts.rawValue) {
+            commands.append(OpenNexusContactsCommand.search.rawValue)
+            commands.append(OpenNexusContactsCommand.add.rawValue)
         }
-        if caps.contains(OpenClawCapability.calendar.rawValue) {
-            commands.append(OpenClawCalendarCommand.events.rawValue)
-            commands.append(OpenClawCalendarCommand.add.rawValue)
+        if caps.contains(OpenNexusCapability.calendar.rawValue) {
+            commands.append(OpenNexusCalendarCommand.events.rawValue)
+            commands.append(OpenNexusCalendarCommand.add.rawValue)
         }
-        if caps.contains(OpenClawCapability.reminders.rawValue) {
-            commands.append(OpenClawRemindersCommand.list.rawValue)
-            commands.append(OpenClawRemindersCommand.add.rawValue)
+        if caps.contains(OpenNexusCapability.reminders.rawValue) {
+            commands.append(OpenNexusRemindersCommand.list.rawValue)
+            commands.append(OpenNexusRemindersCommand.add.rawValue)
         }
-        if caps.contains(OpenClawCapability.motion.rawValue) {
-            commands.append(OpenClawMotionCommand.activity.rawValue)
-            commands.append(OpenClawMotionCommand.pedometer.rawValue)
+        if caps.contains(OpenNexusCapability.motion.rawValue) {
+            commands.append(OpenNexusMotionCommand.activity.rawValue)
+            commands.append(OpenNexusMotionCommand.pedometer.rawValue)
         }
 
         return commands

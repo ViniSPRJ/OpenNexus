@@ -16,13 +16,13 @@ provider mixes reasoning into normal text.
 
 Use `/debug` in chat to set **runtime-only** config overrides (memory, not disk).
 `/debug` is disabled by default; enable with `commands.debug: true`.
-This is handy when you need to toggle obscure settings without editing `openclaw.json`.
+This is handy when you need to toggle obscure settings without editing `opennexus.json`.
 
 Examples:
 
 ```
 /debug show
-/debug set messages.responsePrefix="[openclaw]"
+/debug set messages.responsePrefix="[opennexus]"
 /debug unset messages.responsePrefix
 /debug reset
 ```
@@ -51,7 +51,7 @@ on each restart.
 Use the dev profile to isolate state and spin up a safe, disposable setup for
 debugging. There are **two** `--dev` flags:
 
-- **Global `--dev` (profile):** isolates state under `~/.openclaw-dev` and
+- **Global `--dev` (profile):** isolates state under `~/.opennexus-dev` and
   defaults the gateway port to `19001` (derived ports shift with it).
 - **`gateway --dev`: tells the Gateway to auto-create a default config +
   workspace** when missing (and skip BOOTSTRAP.md).
@@ -60,18 +60,18 @@ Recommended flow (dev profile + dev bootstrap):
 
 ```bash
 pnpm gateway:dev
-OPENCLAW_PROFILE=dev openclaw tui
+OPENNEXUS_PROFILE=dev opennexus tui
 ```
 
-If you don’t have a global install yet, run the CLI via `pnpm openclaw ...`.
+If you don’t have a global install yet, run the CLI via `pnpm opennexus ...`.
 
 What this does:
 
 1. **Profile isolation** (global `--dev`)
-   - `OPENCLAW_PROFILE=dev`
-   - `OPENCLAW_STATE_DIR=~/.openclaw-dev`
-   - `OPENCLAW_CONFIG_PATH=~/.openclaw-dev/openclaw.json`
-   - `OPENCLAW_GATEWAY_PORT=19001` (browser/canvas shift accordingly)
+   - `OPENNEXUS_PROFILE=dev`
+   - `OPENNEXUS_STATE_DIR=~/.opennexus-dev`
+   - `OPENNEXUS_CONFIG_PATH=~/.opennexus-dev/opennexus.json`
+   - `OPENNEXUS_GATEWAY_PORT=19001` (browser/canvas shift accordingly)
 
 2. **Dev bootstrap** (`gateway --dev`)
    - Writes a minimal config if missing (`gateway.mode=local`, bind loopback).
@@ -80,7 +80,7 @@ What this does:
    - Seeds the workspace files if missing:
      `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `IDENTITY.md`, `USER.md`, `HEARTBEAT.md`.
    - Default identity: **C3‑PO** (protocol droid).
-   - Skips channel providers in dev mode (`OPENCLAW_SKIP_CHANNELS=1`).
+   - Skips channel providers in dev mode (`OPENNEXUS_SKIP_CHANNELS=1`).
 
 Reset flow (fresh start):
 
@@ -92,7 +92,7 @@ Note: `--dev` is a **global** profile flag and gets eaten by some runners.
 If you need to spell it out, use the env var form:
 
 ```bash
-OPENCLAW_PROFILE=dev openclaw gateway --dev --reset
+OPENNEXUS_PROFILE=dev opennexus gateway --dev --reset
 ```
 
 `--reset` wipes config, credentials, sessions, and the dev workspace (using
@@ -101,12 +101,12 @@ OPENCLAW_PROFILE=dev openclaw gateway --dev --reset
 Tip: if a non‑dev gateway is already running (launchd/systemd), stop it first:
 
 ```bash
-openclaw gateway stop
+opennexus gateway stop
 ```
 
-## Raw stream logging (OpenClaw)
+## Raw stream logging (OpenNexus)
 
-OpenClaw can log the **raw assistant stream** before any filtering/formatting.
+OpenNexus can log the **raw assistant stream** before any filtering/formatting.
 This is the best way to see whether reasoning is arriving as plain text deltas
 (or as separate thinking blocks).
 
@@ -119,19 +119,19 @@ pnpm gateway:watch --raw-stream
 Optional path override:
 
 ```bash
-pnpm gateway:watch --raw-stream --raw-stream-path ~/.openclaw/logs/raw-stream.jsonl
+pnpm gateway:watch --raw-stream --raw-stream-path ~/.opennexus/logs/raw-stream.jsonl
 ```
 
 Equivalent env vars:
 
 ```bash
-OPENCLAW_RAW_STREAM=1
-OPENCLAW_RAW_STREAM_PATH=~/.openclaw/logs/raw-stream.jsonl
+OPENNEXUS_RAW_STREAM=1
+OPENNEXUS_RAW_STREAM_PATH=~/.opennexus/logs/raw-stream.jsonl
 ```
 
 Default file:
 
-`~/.openclaw/logs/raw-stream.jsonl`
+`~/.opennexus/logs/raw-stream.jsonl`
 
 ## Raw chunk logging (pi-mono)
 

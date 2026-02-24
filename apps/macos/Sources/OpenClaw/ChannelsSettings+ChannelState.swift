@@ -1,4 +1,4 @@
-import OpenClawProtocol
+import OpenNexusProtocol
 import SwiftUI
 
 extension ChannelsSettings {

@@ -14,7 +14,7 @@ extension NSAppearance {
 }
 #endif
 
-enum OpenClawChatTheme {
+enum OpenNexusChatTheme {
     #if os(macOS)
     static func resolvedAssistantBubbleColor(for appearance: NSAppearance) -> NSColor {
         // NSColor semantic colors don't reliably resolve for arbitrary NSAppearance in SwiftPM.
@@ -31,11 +31,11 @@ enum OpenClawChatTheme {
     }
 
     static let assistantBubbleDynamicNSColor = NSColor(
-        name: NSColor.Name("OpenClawChatTheme.assistantBubble"),
+        name: NSColor.Name("OpenNexusChatTheme.assistantBubble"),
         dynamicProvider: resolvedAssistantBubbleColor(for:))
 
     static let onboardingAssistantBubbleDynamicNSColor = NSColor(
-        name: NSColor.Name("OpenClawChatTheme.onboardingAssistantBubble"),
+        name: NSColor.Name("OpenNexusChatTheme.onboardingAssistantBubble"),
         dynamicProvider: resolvedOnboardingAssistantBubbleColor(for:))
     #endif
 
@@ -163,8 +163,8 @@ enum OpenClawChatTheme {
     }
 }
 
-enum OpenClawPlatformImageFactory {
-    static func image(_ image: OpenClawPlatformImage) -> Image {
+enum OpenNexusPlatformImageFactory {
+    static func image(_ image: OpenNexusPlatformImage) -> Image {
         #if os(macOS)
         Image(nsImage: image)
         #else
