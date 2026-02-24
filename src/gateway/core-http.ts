@@ -14,6 +14,9 @@ import {
   mergeAlsoAllowPolicy,
   resolveToolProfilePolicy,
 } from "../agents/tool-policy.js";
+import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
+import { listChannelPlugins } from "../channels/plugins/index.js";
+import { buildChannelAccountSnapshot } from "../channels/plugins/status.js";
 import { loadConfig } from "../config/config.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
 import { logWarn } from "../logger.js";
@@ -38,6 +41,11 @@ type CoreBody = {
   args?: unknown;
   action?: unknown;
   sessionKey?: unknown;
+};
+
+type ChannelAccountSnapshotLite = {
+  accountId?: string;
+  configured?: boolean;
 };
 
 function resolveSessionKeyFromBody(body: CoreBody): string | undefined {
@@ -199,6 +207,82 @@ async function executeTool(params: {
   return true;
 }
 
+async function buildChannelsStatus() {
+  const cfg = loadConfig();
+  const plugins = listChannelPlugins();
+  const channels: Record<string, unknown> = {};
+  const channelAccounts: Record<string, unknown> = {};
+  const channelDefaultAccountId: Record<string, unknown> = {};
+
+  for (const plugin of plugins) {
+    const accountIds = plugin.config.listAccountIds(cfg);
+    const defaultAccountId = resolveChannelDefaultAccountId({
+      plugin,
+      cfg,
+      accountIds,
+    });
+    const accounts: unknown[] = [];
+    for (const accountId of accountIds) {
+      const account = plugin.config.resolveAccount(cfg, accountId);
+      const enabled = plugin.config.isEnabled
+        ? plugin.config.isEnabled(account, cfg)
+        : !(
+            account &&
+            typeof account === "object" &&
+            (account as { enabled?: boolean }).enabled === false
+          );
+      let configured = true;
+      if (plugin.config.isConfigured) {
+        configured = await plugin.config.isConfigured(account, cfg);
+      }
+      const snapshot = await buildChannelAccountSnapshot({
+        plugin,
+        cfg,
+        accountId,
+        runtime: undefined,
+        probe: undefined,
+        audit: undefined,
+      });
+      accounts.push({
+        ...snapshot,
+        enabled,
+        configured,
+      });
+    }
+    const defaultAccount = accounts.find((entry): entry is ChannelAccountSnapshotLite => {
+      return (
+        !!entry &&
+        typeof entry === "object" &&
+        "accountId" in entry &&
+        typeof (entry as ChannelAccountSnapshotLite).accountId === "string" &&
+        (entry as ChannelAccountSnapshotLite).accountId === defaultAccountId
+      );
+    });
+    const summary = plugin.status?.buildChannelSummary
+      ? await plugin.status.buildChannelSummary({
+          account: plugin.config.resolveAccount(cfg, defaultAccountId),
+          cfg,
+          defaultAccountId,
+          snapshot:
+            defaultAccount ?? ({ accountId: defaultAccountId } as ChannelAccountSnapshotLite),
+        })
+      : {
+          configured: defaultAccount?.configured ?? false,
+        };
+
+    channels[plugin.id] = summary;
+    channelAccounts[plugin.id] = accounts;
+    channelDefaultAccountId[plugin.id] = defaultAccountId;
+  }
+
+  return {
+    ts: Date.now(),
+    channels,
+    channelAccounts,
+    channelDefaultAccountId,
+  };
+}
+
 export async function handleCoreHttpRequest(
   req: IncomingMessage,
   res: ServerResponse,
@@ -275,6 +359,12 @@ export async function handleCoreHttpRequest(
       auth: opts.auth,
       rateLimiter: opts.rateLimiter,
     });
+  }
+
+  if (url.pathname === "/core/channels/status") {
+    const payload = await buildChannelsStatus();
+    sendJson(res, 200, { ok: true, result: payload });
+    return true;
   }
 
   sendInvalidRequest(res, "unknown core endpoint");
